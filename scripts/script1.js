@@ -162,35 +162,34 @@ function DrawLine(startX, startY, endX, endY, color, width){
 }
 
 function DrawGrid(){
-    const widthLines = Math.floor(canvas.width/gridSize) + 2;
-    const heightLines = Math.floor(canvas.height/gridSize) + 2;
-    const gridRef = {x: posRef.x%gridSize, y: posRef.y%gridSize};
+    const widthLines = Math.floor(((canvas.width/gridSize)+1)/zoomLevel);
+    const heightLines = Math.floor(((canvas.height/gridSize)+1)/zoomLevel);
+    const gridRef = {x: Math.floor((posRef.x/gridSize)), y: Math.floor((posRef.y/gridSize))};
     for (i = 0; i < widthLines; i++){
-        DrawLine(i*gridSize+gridRef.x, -gridSize+gridRef.y,
-            i*gridSize+gridRef.x, canvas.height, "grey", 0.1);
+        const linePos = WorldToVP({x: (-i)*gridSize-posRef.x, y: 0});
+        DrawLine(linePos.x, 0, linePos.x, canvas.height, "white", 0.1);
     }
     for (i = 0; i < heightLines; i++){
-        DrawLine(-gridSize+gridRef.x, i*gridSize+gridRef.y,
-            canvas.width, i*gridSize+gridRef.y, "grey", 0.1);
+        const linePos = WorldToVP({x: 0, y: (-i-gridRef.y)*gridSize});
+        DrawLine(0, linePos.y, canvas.width, linePos.y, "white", 0.1);
     }
 }
 
+let planet1 = new Planet(-5, -5);
+let planet2 = new Planet(0, 0);
+let planet3 = new Planet(15, 15);
 
 function RenderFrame(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    let planet1 = new Planet(-5, -5);
-    let planet2 = new Planet(0, 0);
-    let planet3 = new Planet(15, 15);
     SmoothZoom();
-    //DrawGrid();
+    DrawGrid();
     planet1.Draw();
     planet2.Draw();
     planet3.Draw();
-    console.log(posRef);
     const camcoor = WorldToCoor(cameraPos);
     coorText.textContent = "X: " + camcoor.x + " Y: " + camcoor.y;
-    DrawLine(Math.floor(canvas.width/2), 0, Math.floor(canvas.width/2), canvas.height);
-    DrawLine(0, Math.floor(canvas.height/2), canvas.width, Math.floor(canvas.height/2));
+    //DrawLine(Math.floor(canvas.width/2), 0, Math.floor(canvas.width/2), canvas.height);
+    //DrawLine(0, Math.floor(canvas.height/2), canvas.width, Math.floor(canvas.height/2));
     requestAnimationFrame(RenderFrame);
 }
 
