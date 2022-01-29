@@ -44,7 +44,7 @@ function VPToWorld(position){
 }
 
 function WorldToCoor(position){
-    return {x: position.x/gridSize, y: position.y/gridSize};
+    return {x: Math.floor(position.x/gridSize), y: Math.floor(position.y/gridSize)};
 }
 
 function WorldToVP(position){
@@ -161,17 +161,29 @@ function DrawLine(startX, startY, endX, endY, color, width){
     ctx.closePath();
 }
 
-function DrawGrid(){
-    const widthLines = Math.floor(((canvas.width/gridSize)+1)/zoomLevel);
-    const heightLines = Math.floor(((canvas.height/gridSize)+1)/zoomLevel);
-    const gridRef = {x: Math.floor((posRef.x/gridSize)), y: Math.floor((posRef.y/gridSize))};
+function DrawGrid(color, thickness){
+    const widthLines = Math.floor(((canvas.width/gridSize)/zoomLevel)/2)+2;
+    const heightLines = Math.floor(((canvas.height/gridSize)/zoomLevel)/2)+2;
+    const camCoor = WorldToCoor(cameraPos);
     for (i = 0; i < widthLines; i++){
-        const linePos = WorldToVP({x: (-i)*gridSize-posRef.x, y: 0});
-        DrawLine(linePos.x, 0, linePos.x, canvas.height, "white", 0.1);
+        let linePos = WorldToVP(CoorToWorld({x: i+camCoor.x, y: 0}));
+        if (i == 0){
+            DrawLine(linePos.x, 0, linePos.x, canvas.height, color, thickness)
+            continue;
+        }
+        DrawLine(linePos.x, 0, linePos.x, canvas.height, color, thickness);
+        linePos = WorldToVP(CoorToWorld({x: -i+camCoor.x, y: 0}));
+        DrawLine(linePos.x, 0, linePos.x, canvas.height, color, thickness);
     }
     for (i = 0; i < heightLines; i++){
-        const linePos = WorldToVP({x: 0, y: (-i-gridRef.y)*gridSize});
-        DrawLine(0, linePos.y, canvas.width, linePos.y, "white", 0.1);
+        let linePos = WorldToVP(CoorToWorld({x: 0, y: i+camCoor.y}));
+        if (i == 0){
+            DrawLine(0, linePos.y, canvas.width, linePos.y, color, thickness)
+            continue;
+        }
+        DrawLine(0, linePos.y, canvas.width, linePos.y, color, thickness);
+        linePos = WorldToVP(CoorToWorld({x: 0, y: -i+camCoor.y}));
+        DrawLine(0, linePos.y, canvas.width, linePos.y, color, thickness);
     }
 }
 
@@ -182,7 +194,7 @@ let planet3 = new Planet(15, 15);
 function RenderFrame(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     SmoothZoom();
-    DrawGrid();
+    DrawGrid("grey", 0.1);
     planet1.Draw();
     planet2.Draw();
     planet3.Draw();
