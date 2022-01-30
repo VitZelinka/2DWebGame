@@ -1,0 +1,1 @@
+export const PLANET_SIZE = 50;

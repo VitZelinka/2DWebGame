@@ -1,23 +1,24 @@
+import Planet from './planet.js';
+import { UpdateCamPos, WorldToCoor, CoorToVP, VPToWorld, SetCamPos } from './UpdateCamPos';
 //CONFIG
 const MAX_ZOOM = 1;
 const MIN_ZOOM = 0.3;
 const ZOOM_SPEED = 0.1;
-const PLANET_SIZE = 50;
 const GRID_SIZE_REF = 100;
 //---------------------------------------
 
 
-const canvas = document.getElementById('canvas1');
+export const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
 const image = document.getElementById('source');
-let gridSize = 100;
+export let gridSize = 100;
 let dragging = false;
 let lastTouchPos = {x: 0, y: 0};
-let mousePos = {x: 0, y: 0};
+export let mousePos = {x: 0, y: 0};
 let desiredZoom = 0.8;
-let zoomLevel = 0.8;
-let cameraPos = {x: 0, y: 0};
-let posRef = {x: 0, y: 0};
+export let zoomLevel = 0.8;
+export let cameraPos = {x: 0, y: 0};
+export let posRef = {x: 0, y: 0};
 const coorText = document.getElementById("coordinates");
 
 canvas.width = window.innerWidth;
@@ -28,48 +29,6 @@ var socket = io();
 socket.on("kokot", xd =>{
     console.log("message received :D", xd);
 })
-
-
-function UpdateCamPos(){
-    const camMid = {x: Math.floor(canvas.width/2), y: Math.floor(canvas.height/2)};
-    cameraPos = VPToWorld(camMid);
-}
-
-function GetMouseWorldPos(){
-    return {x: mousePos.x-posRef.x, y: mousePos.y-posRef.y};
-}
-
-function VPToWorld(position){
-    return {x: position.x-posRef.x, y: position.y-posRef.y};
-}
-
-function WorldToCoor(position){
-    return {x: Math.floor(position.x/gridSize), y: Math.floor(position.y/gridSize)};
-}
-
-function WorldToVP(position){
-    return {x: ((position.x-cameraPos.x)*zoomLevel)+Math.floor(canvas.width/2),
-            y: ((position.y-cameraPos.y)*zoomLevel)+Math.floor(canvas.height/2)};
-}
-
-function CoorToWorld(position){
-    return {x: position.x*gridSize, y: position.y*gridSize};
-}
-
-//Set camera position to coordinates
-function SetCamPos(position){
-    posRef.x = Math.floor(canvas.width/2) - (position.x*gridSize);
-    posRef.y = Math.floor(canvas.height/2) - (position.y*gridSize);
-}
-
-
-
-
-
-
-
-
-
 
 
 window.addEventListener("resize", xd => {
@@ -133,24 +92,6 @@ function SmoothZoom(){
     }
 }
 
-class Planet{
-    constructor(posX, posY){
-        this.position = {x: posX, y: posY};
-    }
-
-    Draw(){
-        let size = PLANET_SIZE * zoomLevel;
-        //const drawPosX = (this.position.x * gridSize) - (size/2) + posRef.x;
-        const drawPos = WorldToVP(CoorToWorld(this.position));
-        ctx.drawImage(image, drawPos.x-(size/2), drawPos.y-(size/2), size, size);
-        //ctx.drawImage(image, drawPosX, drawPosY, size, size);
-    }
-
-    GetWorldPos(){
-        return CoorToWorld(this.position)
-    }
-}
-
 function DrawLine(startX, startY, endX, endY, color, width){
     ctx.beginPath();
     ctx.strokeStyle = color;
@@ -165,29 +106,29 @@ function DrawGrid(color, thickness){
     const widthLines = Math.floor(((canvas.width/gridSize)/zoomLevel)/2)+2;
     const heightLines = Math.floor(((canvas.height/gridSize)/zoomLevel)/2)+2;
     const camCoor = WorldToCoor(cameraPos);
-    for (i = 0; i < widthLines; i++){
-        let linePos = WorldToVP(CoorToWorld({x: i+camCoor.x, y: 0}));
+    for (let i = 0; i < widthLines; i++){
+        let linePos = CoorToVP({x: i+camCoor.x, y: 0});
         if (i == 0){
             DrawLine(linePos.x, 0, linePos.x, canvas.height, color, thickness)
             continue;
         }
         DrawLine(linePos.x, 0, linePos.x, canvas.height, color, thickness);
-        linePos = WorldToVP(CoorToWorld({x: -i+camCoor.x, y: 0}));
+        linePos = CoorToVP({x: -i+camCoor.x, y: 0});
         DrawLine(linePos.x, 0, linePos.x, canvas.height, color, thickness);
     }
-    for (i = 0; i < heightLines; i++){
-        let linePos = WorldToVP(CoorToWorld({x: 0, y: i+camCoor.y}));
+    for (let i = 0; i < heightLines; i++){
+        let linePos = CoorToVP({x: 0, y: i+camCoor.y});
         if (i == 0){
             DrawLine(0, linePos.y, canvas.width, linePos.y, color, thickness)
             continue;
         }
         DrawLine(0, linePos.y, canvas.width, linePos.y, color, thickness);
-        linePos = WorldToVP(CoorToWorld({x: 0, y: -i+camCoor.y}));
+        linePos = CoorToVP({x: 0, y: -i+camCoor.y});
         DrawLine(0, linePos.y, canvas.width, linePos.y, color, thickness);
     }
 }
 
-let planet1 = new Planet(-5, -5);
+let planet1 = new Planet(-5, -3);
 let planet2 = new Planet(0, 0);
 let planet3 = new Planet(15, 15);
 
@@ -198,10 +139,9 @@ function RenderFrame(){
     planet1.Draw();
     planet2.Draw();
     planet3.Draw();
-    const camcoor = WorldToCoor(cameraPos);
+    planet3.Entangle(planet1.GetCoor());
+    const camcoor = VPToWorld(mousePos);
     coorText.textContent = "X: " + camcoor.x + " Y: " + camcoor.y;
-    //DrawLine(Math.floor(canvas.width/2), 0, Math.floor(canvas.width/2), canvas.height);
-    //DrawLine(0, Math.floor(canvas.height/2), canvas.width, Math.floor(canvas.height/2));
     requestAnimationFrame(RenderFrame);
 }
 
