@@ -1,14 +1,17 @@
-import { PLANET_SIZE } from "./modules";
+
+import { PLANET_SIZE } from "./modules.js";
+import { CoorToVP, CoorToWorld } from "./modules.js";
+
 export default class Planet{
     constructor(position, image){
         this.position = {x: position.x, y: position.y};
         this.image = image;
     }
 
-    Draw(zoom){
+    Draw(ctx, canvas, zoom, cameraPos, gridSize){
         let size = PLANET_SIZE * zoom;
-        const drawPos = CoorToVP(this.position);
-        ctx.drawImage(image, drawPos.x-(size/2), drawPos.y-(size/2), size, size);
+        const drawPos = CoorToVP(canvas,this.position,zoom,cameraPos,gridSize);
+        ctx.drawImage(this.image, drawPos.x-(size/2), drawPos.y-(size/2), size, size);
     }
 
     GetWorldPos(){
@@ -17,11 +20,5 @@ export default class Planet{
 
     GetCoor(){
         return this.position;
-    }
-
-    Entangle(pos){
-        const xd = CoorToVP(pos);
-        const xd2 = CoorToVP(this.position);
-        DrawLine(xd2.x, xd2.y, xd.x, xd.y, "yellow", 2);
     }
 }

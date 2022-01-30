@@ -1,24 +1,19 @@
-import Planet from './planet.js';
-import { UpdateCamPos, WorldToCoor, CoorToVP, VPToWorld, SetCamPos } from './UpdateCamPos';
-//CONFIG
-const MAX_ZOOM = 1;
-const MIN_ZOOM = 0.3;
-const ZOOM_SPEED = 0.1;
-const GRID_SIZE_REF = 100;
-//---------------------------------------
+import { MAX_ZOOM, MIN_ZOOM, ZOOM_SPEED, GRID_SIZE_REF } from "./config.js";
+import {Planet} from "./modules.js";
+import {GetNewCamPos, VPToWorld, WorldToCoor, WorldToVP,
+        CoorToWorld, CoorToVP, CamCoorToRef} from "./modules.js";
 
-
-export const canvas = document.getElementById('canvas1');
+const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
 const image = document.getElementById('source');
-export let gridSize = 100;
+let gridSize = GRID_SIZE_REF;
 let dragging = false;
 let lastTouchPos = {x: 0, y: 0};
-export let mousePos = {x: 0, y: 0};
+let mousePos = {x: 0, y: 0};
 let desiredZoom = 0.8;
-export let zoomLevel = 0.8;
-export let cameraPos = {x: 0, y: 0};
-export let posRef = {x: 0, y: 0};
+let zoomLevel = 0.8;
+let cameraPos = {x: 0, y: 0};
+let posRef = {x: 0, y: 0};
 const coorText = document.getElementById("coordinates");
 
 canvas.width = window.innerWidth;
@@ -59,7 +54,7 @@ function HandleDragMove(data){
             posRef.x += data.movementX/zoomLevel;
             posRef.y += data.movementY/zoomLevel;
         }
-        UpdateCamPos();
+        cameraPos = GetNewCamPos(canvas, posRef);
     }
 }
 canvas.addEventListener("mousemove", HandleDragMove, false);
@@ -105,46 +100,45 @@ function DrawLine(startX, startY, endX, endY, color, width){
 function DrawGrid(color, thickness){
     const widthLines = Math.floor(((canvas.width/gridSize)/zoomLevel)/2)+2;
     const heightLines = Math.floor(((canvas.height/gridSize)/zoomLevel)/2)+2;
-    const camCoor = WorldToCoor(cameraPos);
+    const camCoor = WorldToCoor(cameraPos, gridSize);
     for (let i = 0; i < widthLines; i++){
-        let linePos = CoorToVP({x: i+camCoor.x, y: 0});
+        let linePos = CoorToVP(canvas,{x: i+camCoor.x, y: 0},zoomLevel,cameraPos,gridSize);
         if (i == 0){
             DrawLine(linePos.x, 0, linePos.x, canvas.height, color, thickness)
             continue;
         }
         DrawLine(linePos.x, 0, linePos.x, canvas.height, color, thickness);
-        linePos = CoorToVP({x: -i+camCoor.x, y: 0});
+        linePos = CoorToVP(canvas,{x: -i+camCoor.x, y: 0},zoomLevel, cameraPos, gridSize);
         DrawLine(linePos.x, 0, linePos.x, canvas.height, color, thickness);
     }
     for (let i = 0; i < heightLines; i++){
-        let linePos = CoorToVP({x: 0, y: i+camCoor.y});
+        let linePos = CoorToVP(canvas,{x: 0, y: i+camCoor.y},zoomLevel,cameraPos,gridSize);
         if (i == 0){
             DrawLine(0, linePos.y, canvas.width, linePos.y, color, thickness)
             continue;
         }
         DrawLine(0, linePos.y, canvas.width, linePos.y, color, thickness);
-        linePos = CoorToVP({x: 0, y: -i+camCoor.y});
+        linePos = CoorToVP(canvas,{x: 0, y: -i+camCoor.y},zoomLevel,cameraPos,gridSize);
         DrawLine(0, linePos.y, canvas.width, linePos.y, color, thickness);
     }
 }
 
-let planet1 = new Planet(-5, -3);
-let planet2 = new Planet(0, 0);
-let planet3 = new Planet(15, 15);
+let planet1 = new Planet({x: -5, y: -3}, image);
+let planet2 = new Planet({x: 0, y: 0}, image);
+let planet3 = new Planet({x: 15, y: 15}, image);
 
 function RenderFrame(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     SmoothZoom();
     DrawGrid("grey", 0.1);
-    planet1.Draw();
-    planet2.Draw();
-    planet3.Draw();
-    planet3.Entangle(planet1.GetCoor());
-    const camcoor = VPToWorld(mousePos);
+    planet1.Draw(ctx, canvas, zoomLevel, cameraPos, gridSize);
+    planet2.Draw(ctx, canvas, zoomLevel, cameraPos, gridSize);
+    planet3.Draw(ctx, canvas, zoomLevel, cameraPos, gridSize);
+    const camcoor = VPToWorld(canvas, mousePos, zoomLevel, cameraPos);
     coorText.textContent = "X: " + camcoor.x + " Y: " + camcoor.y;
     requestAnimationFrame(RenderFrame);
 }
 
-SetCamPos({x: 0, y: 0});
-UpdateCamPos();
+posRef = CamCoorToRef(canvas, {x: 0, y: 0}, gridSize);
+cameraPos = GetNewCamPos(canvas, posRef);
 RenderFrame();

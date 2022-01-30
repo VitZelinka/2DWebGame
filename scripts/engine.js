@@ -1,50 +1,35 @@
 
 
-function UpdateCamPos(){
-    cameraPos = {x: Math.floor(canvas.width/2)-posRef.x,
-                 y: Math.floor(canvas.height/2)-posRef.y};
+export function GetNewCamPos(canvas, posRef){
+    return {x: Math.floor(canvas.width/2)-posRef.x,
+            y: Math.floor(canvas.height/2)-posRef.y};
 }
 
-// deprecated
-function VPToWorld2(position){
-    return {x: position.x-posRef.x, y: position.y-posRef.y};
+export function VPToWorld(canvas, position, zoom, cameraPos){
+    return {x: (position.x - Math.floor(canvas.width/2))/zoom + cameraPos.x,
+            y: (position.y - Math.floor(canvas.height/2))/zoom + cameraPos.y};
 }
 
-function VPToWorld(){
-    return {x: (mousePos.x - Math.floor(canvas.width/2))/zoomLevel + cameraPos.x,
-            y: (mousePos.y - Math.floor(canvas.height/2))/zoomLevel + cameraPos.y};
-}
-
-function WorldToCoor(position){
+export function WorldToCoor(position, gridSize){
     return {x: Math.floor(position.x/gridSize), y: Math.floor(position.y/gridSize)};
 }
 
-function WorldToVP(position){
-    return {x: ((position.x-cameraPos.x)*zoomLevel)+Math.floor(canvas.width/2),
-            y: ((position.y-cameraPos.y)*zoomLevel)+Math.floor(canvas.height/2)};
+export function WorldToVP(canvas, position, zoom, cameraPos){
+    return {x: ((position.x-cameraPos.x)*zoom)+Math.floor(canvas.width/2),
+            y: ((position.y-cameraPos.y)*zoom)+Math.floor(canvas.height/2)};
 } 
-/*
-    (x-y)*z+n = f;
-    (x-y)*z = f-n;
-    x-y = (f-n)/z;
-    x = (f-n)/z + y;
-    y - cameraPos
-    z - zoomLevel
-    n - screenMidPoint
-    f - VPpos
-    x - World pos
-*/
 
-function CoorToWorld(position){
+export function CoorToWorld(position, gridSize){
     return {x: position.x*gridSize, y: position.y*gridSize};
 }
 
-function CoorToVP(position){
-    return WorldToVP(CoorToWorld(position));
+export function CoorToVP(canvas, position, zoom, cameraPos, gridSize){
+    return WorldToVP(canvas, CoorToWorld(position, gridSize), 
+                     zoom, cameraPos);
 }
 
 //Set camera position to coordinates
-function SetCamPos(position){
-    posRef.x = Math.floor(canvas.width/2) - (position.x*gridSize);
-    posRef.y = Math.floor(canvas.height/2) - (position.y*gridSize);
+export function CamCoorToRef(canvas, position, gridSize){
+    return {x: Math.floor(canvas.width/2) - (position.x*gridSize),
+            y: Math.floor(canvas.height/2) - (position.y*gridSize)};
 }
