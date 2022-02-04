@@ -1,28 +1,23 @@
 
 import { PLANET_SIZE } from "./modules.js";
-import { CoorToVP, CoorToWorld } from "./modules.js";
 
 export default class Planet{
-    constructor(position, image){
-        this.position = {x: position.x, y: position.y};
+    constructor(CPos, image){
+        this.CPos = {x: CPos.x, y: CPos.y};
         this.image = image;
     }
 
-    Draw(ctx, canvas, zoom, cameraPos, gridSize){
-        let size = PLANET_SIZE * zoom;
-        const drawPos = CoorToVP(canvas,this.position,zoom,cameraPos,gridSize);
-        ctx.drawImage(this.image, drawPos.x-(size/2), drawPos.y-(size/2), size, size);
+    Draw(engine){
+        let size = PLANET_SIZE * engine.zoomLevel;
+        const drawPos = engine.CoorToVP(this.CPos);
+        engine.ctx.drawImage(this.image, drawPos.x-(size/2), drawPos.y-(size/2), size, size);
     }
 
-    GetWorldPos(gridSize){
-        return CoorToWorld(this.position, gridSize);
-    }
-
-    GetCoor(){
-        return this.position;
+    GetWPos(engine){
+        return engine.CoorToWorld(this.CPos);
     }
 
     GotClicked(){
-        console.log(this.position);
+        console.log(this.CPos);
     }
 }

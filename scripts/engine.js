@@ -1,49 +1,135 @@
-import {Planet} from "./modules.js";
+import { ZOOM_SPEED, MIN_ZOOM, MAX_ZOOM, GRID_SIZE_REF } from "./config.js";
 
-export function GetNewCamPos(canvas, posRef){
-    return {x: Math.floor(canvas.width/2)-posRef.x,
-            y: Math.floor(canvas.height/2)-posRef.y};
-}
+export default class Engine{
+    constructor(canvas, ctx){
+        this.canvas = canvas;
+        this.ctx = ctx;
+        this.gridSize = GRID_SIZE_REF;
+        this.dragging = false;
+        this.lastTouchVPPos = {x: 0, y: 0};
+        this.mouseVPPos = {x: 0, y: 0};
+        this.desiredZoom = 1;
+        this.zoomLevel = 0.3;
+        this.camWPos = {x: 0, y: 0};
+        this.posVPRef = {x: 0, y: 0};
+        this.objects = [];
+    }
+    
+    VPToWorld(VPPos){
+        return {x: (VPPos.x - Math.floor(this.canvas.width/2))/this.zoomLevel + this.camWPos.x,
+                y: (VPPos.y - Math.floor(this.canvas.height/2))/this.zoomLevel + this.camWPos.y};
+    }
+    
+    WorldToCoor(WPos){
+        return {x: Math.floor(WPos.x/this.gridSize), y: Math.floor(WPos.y/this.gridSize)};
+    }
+    
+    WorldToVP(WPos){
+        return {x: ((WPos.x-this.camWPos.x)*this.zoomLevel)+Math.floor(this.canvas.width/2),
+                y: ((WPos.y-this.camWPos.y)*this.zoomLevel)+Math.floor(this.canvas.height/2)};
+    } 
+    
+    CoorToWorld(CPos){
+        return {x: CPos.x*this.gridSize, y: CPos.y*this.gridSize};
+    }
+    
+    CoorToVP(CPos){
+        return this.WorldToVP(this.CoorToWorld(CPos));
+    }
 
-export function VPToWorld(canvas, position, zoom, cameraPos){
-    return {x: (position.x - Math.floor(canvas.width/2))/zoom + cameraPos.x,
-            y: (position.y - Math.floor(canvas.height/2))/zoom + cameraPos.y};
-}
+    //---------- CAMERA ----------
 
-export function WorldToCoor(position, gridSize){
-    return {x: Math.floor(position.x/gridSize), y: Math.floor(position.y/gridSize)};
-}
+    UpdateCamWPos(){
+        this.camWPos = {x: Math.floor(this.canvas.width/2)-this.posVPRef.x,
+                        y: Math.floor(this.canvas.height/2)-this.posVPRef.y};
+    }
 
-export function WorldToVP(canvas, position, zoom, cameraPos){
-    return {x: ((position.x-cameraPos.x)*zoom)+Math.floor(canvas.width/2),
-            y: ((position.y-cameraPos.y)*zoom)+Math.floor(canvas.height/2)};
-} 
+    MoveCam(CPos){
+        this.posVPRef = {x: Math.floor(this.canvas.width/2) - (CPos.x*this.gridSize),
+                         y: Math.floor(this.canvas.height/2) - (CPos.y*this.gridSize)};
+    }
 
-export function CoorToWorld(position, gridSize){
-    return {x: position.x*gridSize, y: position.y*gridSize};
-}
-
-export function CoorToVP(canvas, position, zoom, cameraPos, gridSize){
-    return WorldToVP(canvas, CoorToWorld(position, gridSize), 
-                     zoom, cameraPos);
-}
-
-//Set camera position to coordinates
-export function CamCoorToRef(canvas, position, gridSize){
-    return {x: Math.floor(canvas.width/2) - (position.x*gridSize),
-            y: Math.floor(canvas.height/2) - (position.y*gridSize)};
-}
-
-//TODO: fix gridSize, maybe refactor everything into class or do something i dont fucking know :D
-export function FindClickedObjects(element){
-    let planetWorldPos = element.GetWorldPos(gridSize);
-    console.log(element);
-    console.log("Debug:"+(planetWorldPos.x-25)+" "+this.x);
-    if ((planetWorldPos.x-25) <= this.x && (planetWorldPos.x+25) >= this.x){
-        if ((planetWorldPos.y-25) <= this.y && (planetWorldPos.y+25) >= this.y){
-            return element;
+    SmoothZoom(){
+        const diff = Math.abs(this.zoomLevel - this.desiredZoom);
+        const zoomAmount = diff * ZOOM_SPEED;
+        if (this.zoomLevel == this.desiredZoom){return;}
+        if (this.zoomLevel < this.desiredZoom){
+            this.zoomLevel += zoomAmount;
+        } else if (this.zoomLevel > this.desiredZoom){
+            this.zoomLevel -= zoomAmount;
         }
     }
-    return element;
+
+    DragCamera(data){
+        this.mouseVPPos.x = data.pageX;
+        this.mouseVPPos.y = data.pageY;
+        if (this.dragging){
+            this.posVPRef.x += data.movementX/this.zoomLevel;
+            this.posVPRef.y += data.movementY/this.zoomLevel;
+            this.UpdateCamWPos();
+        }
+    }
+
+    ChangeZoom(data){
+        this.desiredZoom += data.deltaY * -0.001;
+        if (this.desiredZoom < MIN_ZOOM){
+            this.desiredZoom = MIN_ZOOM;
+        } else if (this.desiredZoom > MAX_ZOOM){
+            this.desiredZoom = MAX_ZOOM;
+        }
+    }
+    
+    //---------- DRAWING ----------
+
+    DrawLine(startVPPos, endVPPos, color, width){
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = color;
+        this.ctx.lineWidth = width;
+        this.ctx.moveTo(startVPPos.x, startVPPos.y);
+        this.ctx.lineTo(endVPPos.x, endVPPos.y);
+        this.ctx.stroke();
+        this.ctx.closePath();
+    }
+
+    DrawGrid(color, thickness){
+        const widthLines = Math.floor(((this.canvas.width/this.gridSize)/this.zoomLevel)/2)+2;
+        const heightLines = Math.floor(((this.canvas.height/this.gridSize)/this.zoomLevel)/2)+2;
+        const camCoor = this.WorldToCoor(this.camWPos);
+        for (let i = 0; i < widthLines; i++){
+            let linePos = this.CoorToVP({x: i+camCoor.x, y: 0});
+            if (i == 0){
+                this.DrawLine({x:linePos.x,y:0},{x:linePos.x,y:this.canvas.height},color,thickness);
+                continue;
+            }
+            this.DrawLine({x:linePos.x,y:0},{x:linePos.x,y:this.canvas.height},color,thickness);
+            linePos = this.CoorToVP({x: -i+camCoor.x, y: 0});
+            this.DrawLine({x:linePos.x,y:0},{x:linePos.x,y:this.canvas.height},color,thickness);
+        }
+        for (let i = 0; i < heightLines; i++){
+            let linePos = this.CoorToVP({x: 0, y: i+camCoor.y});
+            if (i == 0){
+                this.DrawLine({x:0,y:linePos.y},{x:this.canvas.width,y:linePos.y},color,thickness);
+                continue;
+            }
+            this.DrawLine({x:0,y:linePos.y},{x:this.canvas.width,y:linePos.y},color,thickness);
+            linePos = this.CoorToVP({x: 0, y: -i+camCoor.y});
+            this.DrawLine({x:0,y:linePos.y},{x:this.canvas.width,y:linePos.y},color,thickness);
+        }
+    }
+
+
+    //------------------------------------------------
+
+    //TODO: fix gridSize, maybe refactor everything into class or do something i dont fucking know :D
+    FindClickedObjects(element){
+        let planetWorldPos = element.GetWorldPos(gridSize);
+        console.log(element);
+        console.log("Debug:"+(planetWorldPos.x-25)+" "+this.x);
+        if ((planetWorldPos.x-25) <= this.x && (planetWorldPos.x+25) >= this.x){
+            if ((planetWorldPos.y-25) <= this.y && (planetWorldPos.y+25) >= this.y){
+                return element;
+            }
+        }
+        return element;
+    }
 }
-//xd classification
