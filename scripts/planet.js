@@ -14,11 +14,15 @@ export default class Planet{
         ctx.drawImage(this.image, drawPos.x-(size/2), drawPos.y-(size/2), size, size);
     }
 
-    GetWorldPos(){
-        return CoorToWorld(this.position)
+    GetWorldPos(gridSize){
+        return CoorToWorld(this.position, gridSize);
     }
 
     GetCoor(){
         return this.position;
+    }
+
+    GotClicked(){
+        console.log(this.position);
     }
 }

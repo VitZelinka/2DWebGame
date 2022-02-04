@@ -1,4 +1,4 @@
-
+import {Planet} from "./modules.js";
 
 export function GetNewCamPos(canvas, posRef){
     return {x: Math.floor(canvas.width/2)-posRef.x,
@@ -32,4 +32,17 @@ export function CoorToVP(canvas, position, zoom, cameraPos, gridSize){
 export function CamCoorToRef(canvas, position, gridSize){
     return {x: Math.floor(canvas.width/2) - (position.x*gridSize),
             y: Math.floor(canvas.height/2) - (position.y*gridSize)};
+}
+
+//TODO: fix gridSize, maybe refactor everything into class or do something i dont fucking know :D
+export function FindClickedObjects(element){
+    let planetWorldPos = element.GetWorldPos(gridSize);
+    console.log(element);
+    console.log("Debug:"+(planetWorldPos.x-25)+" "+this.x);
+    if ((planetWorldPos.x-25) <= this.x && (planetWorldPos.x+25) >= this.x){
+        if ((planetWorldPos.y-25) <= this.y && (planetWorldPos.y+25) >= this.y){
+            return element;
+        }
+    }
+    return element;
 }

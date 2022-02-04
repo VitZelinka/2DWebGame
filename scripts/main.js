@@ -1,7 +1,7 @@
-import { MAX_ZOOM, MIN_ZOOM, ZOOM_SPEED, GRID_SIZE_REF } from "./config.js";
+import { MAX_ZOOM, MIN_ZOOM, ZOOM_SPEED, GRID_SIZE_REF } from "./modules.js";
 import {Planet} from "./modules.js";
 import {GetNewCamPos, VPToWorld, WorldToCoor, WorldToVP,
-        CoorToWorld, CoorToVP, CamCoorToRef} from "./modules.js";
+        CoorToWorld, CoorToVP, CamCoorToRef, FindClickedObjects} from "./modules.js";
 
 const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
@@ -10,11 +10,12 @@ let gridSize = GRID_SIZE_REF;
 let dragging = false;
 let lastTouchPos = {x: 0, y: 0};
 let mousePos = {x: 0, y: 0};
-let desiredZoom = 0.8;
-let zoomLevel = 0.8;
+let desiredZoom = 1;
+let zoomLevel = 0.3;
 let cameraPos = {x: 0, y: 0};
 let posRef = {x: 0, y: 0};
 const coorText = document.getElementById("coordinates");
+let objects = [];
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -126,6 +127,18 @@ function DrawGrid(color, thickness){
 let planet1 = new Planet({x: -5, y: -3}, image);
 let planet2 = new Planet({x: 0, y: 0}, image);
 let planet3 = new Planet({x: 15, y: 15}, image);
+
+objects.push(planet1);
+objects.push(planet2);
+objects.push(planet3);
+
+canvas.addEventListener("mousedown", xd =>{
+    const clickedPos = VPToWorld(canvas, mousePos, zoomLevel, cameraPos);
+    const clickedObjects = objects.map(FindClickedObjects, clickedPos);
+    clickedObjects.forEach(element => {
+        element.GotClicked();
+    });
+});
 
 function RenderFrame(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
