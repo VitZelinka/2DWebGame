@@ -1,5 +1,6 @@
 
 import { PLANET_SIZE } from "./modules.js";
+import {Engine} from "./modules.js";
 
 export default class Planet{
     constructor(CPos, image){
@@ -15,6 +16,10 @@ export default class Planet{
 
     GetWPos(engine){
         return engine.CoorToWorld(this.CPos);
+    }
+
+    GetHitbox(engine){
+        return PLANET_SIZE/2;
     }
 
     GotClicked(){

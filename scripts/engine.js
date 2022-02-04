@@ -6,6 +6,7 @@ export default class Engine{
         this.ctx = ctx;
         this.gridSize = GRID_SIZE_REF;
         this.dragging = false;
+        this.clicking = false;
         this.lastTouchVPPos = {x: 0, y: 0};
         this.mouseVPPos = {x: 0, y: 0};
         this.desiredZoom = 1;
@@ -49,6 +50,7 @@ export default class Engine{
                          y: Math.floor(this.canvas.height/2) - (CPos.y*this.gridSize)};
     }
 
+    //TODO: modify speed according to framerate
     SmoothZoom(){
         const diff = Math.abs(this.zoomLevel - this.desiredZoom);
         const zoomAmount = diff * ZOOM_SPEED;
@@ -118,18 +120,25 @@ export default class Engine{
     }
 
 
-    //------------------------------------------------
+    //---------- INPUT ----------
 
-    //TODO: fix gridSize, maybe refactor everything into class or do something i dont fucking know :D
-    FindClickedObjects(element){
-        let planetWorldPos = element.GetWorldPos(gridSize);
-        console.log(element);
-        console.log("Debug:"+(planetWorldPos.x-25)+" "+this.x);
-        if ((planetWorldPos.x-25) <= this.x && (planetWorldPos.x+25) >= this.x){
-            if ((planetWorldPos.y-25) <= this.y && (planetWorldPos.y+25) >= this.y){
-                return element;
+    HandleClick(engine){
+        let clickedObjects = this.objects.map(this.FindClickedObjects, engine);
+        clickedObjects = clickedObjects.filter(obj => obj != null);
+        clickedObjects.forEach(object => {
+            object.GotClicked();
+        })
+    }
+
+    FindClickedObjects(object){
+        const objWPos = object.GetWPos(this);
+        const mouseWPos = this.VPToWorld(this.mouseVPPos);
+        const hitbox = object.GetHitbox(this);
+        if ((objWPos.x-hitbox) <= mouseWPos.x && (objWPos.x+hitbox) >= mouseWPos.x){
+            if ((objWPos.y-hitbox) <= mouseWPos.y && (objWPos.y+hitbox) >= mouseWPos.y){
+                return object;
             }
         }
-        return element;
+        return null;
     }
 }

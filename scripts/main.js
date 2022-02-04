@@ -25,14 +25,20 @@ window.addEventListener("resize", xd => {
 
 canvas.addEventListener("mousedown", data => {
     engine.dragging = true;
+    engine.clicking = true;
 });
 
 canvas.addEventListener("mousemove", data => {
     engine.DragCamera(data);
+    engine.clicking = false;
 });
 
 canvas.addEventListener("mouseup", data => {
     engine.dragging = false;
+    if (engine.clicking){
+        engine.clicking = false;
+        engine.HandleClick(engine);
+    }
 });
 
 canvas.addEventListener("wheel", data => {
@@ -42,8 +48,11 @@ canvas.addEventListener("wheel", data => {
 let planet1 = new Planet({x: -5, y: -3}, image);
 let planet2 = new Planet({x: 0, y: 0}, image);
 let planet3 = new Planet({x: 15, y: 15}, image);
-console.log(planet1.CPos);
-console.log(planet1.image);
+engine.objects.push(planet1);
+engine.objects.push(planet2);
+engine.objects.push(planet3);
+
+
 
 function RenderFrame(){
     engine.ctx.clearRect(0, 0, canvas.width, canvas.height);
