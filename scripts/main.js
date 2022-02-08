@@ -62,7 +62,7 @@ function RenderFrame(){
     planet2.Draw(engine);
     planet3.Draw(engine);
     //const camcoor = engine.VPToWorld(engine.mouseVPPos);
-    const camcoor = {x: screen.width*window.devicePixelRatio, y: screen.height*window.devicePixelRatio};
+    const camcoor = {x: screen.width, y: screen.height};
     console.log(window.devicePixelRatio);
     coorText.textContent = "X: " + camcoor.x + " Y: " + camcoor.y;
     requestAnimationFrame(RenderFrame);
