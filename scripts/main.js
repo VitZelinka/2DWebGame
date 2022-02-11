@@ -8,8 +8,8 @@ const coorText = document.getElementById("coordinates");
 
 const engine = new Engine(canvas, ctx);
 
-canvas.width = window.innerWidth*window.devicePixelRatio;
-canvas.height = window.innerHeight*window.devicePixelRatio;
+canvas.width = Math.round(window.innerWidth*window.devicePixelRatio);
+canvas.height = Math.round(window.innerHeight*window.devicePixelRatio);
 
 var socket = io();
 
@@ -19,8 +19,8 @@ socket.on("kokot", xd =>{
 
 
 window.addEventListener("resize", xd => {
-    canvas.width = window.innerWidth*window.devicePixelRatio;
-    canvas.height = window.innerHeight*window.devicePixelRatio;
+    canvas.width = Math.round(window.innerWidth*window.devicePixelRatio);
+    canvas.height = Math.round(window.innerHeight*window.devicePixelRatio);
 })
 
 canvas.addEventListener("mousedown", data => {
@@ -61,13 +61,13 @@ function RenderFrame(){
     planet1.Draw(engine);
     planet2.Draw(engine);
     planet3.Draw(engine);
-    //const camcoor = engine.VPToWorld(engine.mouseVPPos);
-    const camcoor = {x: screen.width, y: screen.height};
+    const camcoor = engine.VPToWorld(engine.mouseVPPos);
+    //const camcoor = engine.mouseVPPos;
+    //const camcoor = {x: screen.width, y: screen.height};
     console.log(window.devicePixelRatio);
     coorText.textContent = "X: " + camcoor.x + " Y: " + camcoor.y;
     requestAnimationFrame(RenderFrame);
 }
 
-engine.MoveCam({x: 0.5, y: 0});
-engine.UpdateCamWPos();
+engine.MoveCam({x: -5, y: -3});
 RenderFrame();

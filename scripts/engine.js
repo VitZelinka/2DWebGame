@@ -17,8 +17,9 @@ export default class Engine{
     }
     
     VPToWorld(VPPos){
-        return {x: (VPPos.x - Math.floor(this.canvas.width/2))/this.zoomLevel + this.camWPos.x,
-                y: (VPPos.y - Math.floor(this.canvas.height/2))/this.zoomLevel + this.camWPos.y};
+        const pixRatio = window.devicePixelRatio;
+        return {x: (VPPos.x*pixRatio - Math.floor(this.canvas.width/2))/this.zoomLevel + this.camWPos.x,
+                y: (VPPos.y*pixRatio - Math.floor(this.canvas.height/2))/this.zoomLevel + this.camWPos.y};
     }
     
     WorldToCoor(WPos){
@@ -48,6 +49,7 @@ export default class Engine{
     MoveCam(CPos){
         this.posVPRef = {x: Math.floor(this.canvas.width/2) - (CPos.x*this.gridSize),
                          y: Math.floor(this.canvas.height/2) - (CPos.y*this.gridSize)};
+        this.UpdateCamWPos();
     }
 
     //TODO: modify speed according to framerate
@@ -66,8 +68,8 @@ export default class Engine{
         this.mouseVPPos.x = data.pageX;
         this.mouseVPPos.y = data.pageY;
         if (this.dragging){
-            this.posVPRef.x += data.movementX/this.zoomLevel;
-            this.posVPRef.y += data.movementY/this.zoomLevel;
+            this.posVPRef.x += (data.movementX/this.zoomLevel);
+            this.posVPRef.y += (data.movementY/this.zoomLevel);
             this.UpdateCamWPos();
         }
     }
