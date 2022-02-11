@@ -19,8 +19,8 @@ socket.on("kokot", xd =>{
 
 
 window.addEventListener("resize", xd => {
-    canvas.width = Math.round(window.innerWidth*window.devicePixelRatio);
-    canvas.height = Math.round(window.innerHeight*window.devicePixelRatio);
+    canvas.width = Math.floor(window.innerWidth*window.devicePixelRatio);
+    canvas.height = Math.floor(window.innerHeight*window.devicePixelRatio);
 })
 
 canvas.addEventListener("mousedown", data => {
