@@ -29,7 +29,7 @@ io.on('connection', (socket) => {
 });
 
 app.get('/', function(req, res) {
-    console.log('Page served');
+    console.log('Page serveddd');
     res.render("index");
 });
 
