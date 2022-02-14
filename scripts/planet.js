@@ -18,7 +18,7 @@ export default class Planet{
         return engine.CoorToWorld(this.CPos);
     }
 
-    GetHitbox(engine){
+    CheckCollision(){
         return PLANET_SIZE/2;
     }
 

@@ -135,7 +135,7 @@ export default class Engine{
     FindClickedObjects(object){
         const objWPos = object.GetWPos(this);
         const mouseWPos = this.VPToWorld(this.mouseVPPos);
-        const hitbox = object.GetHitbox(this);
+        const hitbox = object.CheckCollision();
         if ((objWPos.x-hitbox) <= mouseWPos.x && (objWPos.x+hitbox) >= mouseWPos.x){
             if ((objWPos.y-hitbox) <= mouseWPos.y && (objWPos.y+hitbox) >= mouseWPos.y){
                 return object;
