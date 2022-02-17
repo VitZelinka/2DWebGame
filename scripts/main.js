@@ -54,7 +54,8 @@ engine.objects.push(planet3);
 
 
 
-function RenderFrame(){
+function RenderFrame(timestamp){
+    engine.frameTime = timestamp - engine.frameTime;
     engine.ctx.clearRect(0, 0, canvas.width, canvas.height);
     engine.SmoothZoom();
     engine.DrawGrid("grey", 0.1);
@@ -64,8 +65,10 @@ function RenderFrame(){
     //const camcoor = engine.VPToWorld(engine.mouseVPPos);
     //const camcoor = engine.mouseVPPos;
     const camcoor = {x: screen.width, y: screen.height};
-    console.log(window.devicePixelRatio);
+    //console.log(window.devicePixelRatio);
+    //console.log(engine.frameTime);
     coorText.textContent = "X: " + camcoor.x + " Y: " + camcoor.y;
+    engine.frameTime = timestamp;
     requestAnimationFrame(RenderFrame);
 }
 

@@ -14,6 +14,7 @@ export default class Engine{
         this.camWPos = {x: 0, y: 0};
         this.posVPRef = {x: 0, y: 0};
         this.objects = [];
+        this.frameTime = 1;
     }
     
     VPToWorld(VPPos){
@@ -52,11 +53,16 @@ export default class Engine{
         this.UpdateCamWPos();
     }
 
-    //TODO: modify speed according to framerate
     SmoothZoom(){
         const diff = Math.abs(this.zoomLevel - this.desiredZoom);
-        const zoomAmount = diff * ZOOM_SPEED;
-        if (this.zoomLevel == this.desiredZoom){return;}
+        let speedModifier;
+        if (Number.isNaN(this.frameTime)){
+            speedModifier = 1;
+        } else {
+            speedModifier = this.frameTime;
+        }
+        const zoomAmount = diff * ZOOM_SPEED * speedModifier;
+        if (this.zoomLevel === this.desiredZoom){return;}
         if (this.zoomLevel < this.desiredZoom){
             this.zoomLevel += zoomAmount;
         } else if (this.zoomLevel > this.desiredZoom){
