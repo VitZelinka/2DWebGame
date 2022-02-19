@@ -17,13 +17,25 @@ socket.on("kokot", xd =>{
     console.log("message received :D", xd);
 })
 
+socket.emit("get_planets");
 
-window.addEventListener("resize", xd => {
+socket.on("receive_planets", data => {
+    console.log(data);
+    data.forEach(element => {
+        const planet = new Planet({x: element.position[0], y: element.position[1]}, image);
+        console.log("Planet: "+ element.position[0]);
+        engine.objects.push(planet);
+    });
+    console.log("Loaded planet.");
+});
+
+
+window.addEventListener("resize", () => {
     canvas.width = Math.floor(window.innerWidth*window.devicePixelRatio);
     canvas.height = Math.floor(window.innerHeight*window.devicePixelRatio);
-})
+});
 
-canvas.addEventListener("mousedown", data => {
+canvas.addEventListener("mousedown", () => {
     engine.dragging = true;
     engine.clicking = true;
 });
@@ -33,7 +45,7 @@ canvas.addEventListener("mousemove", data => {
     engine.clicking = false;
 });
 
-canvas.addEventListener("mouseup", data => {
+canvas.addEventListener("mouseup", () => {
     engine.dragging = false;
     if (engine.clicking){
         engine.clicking = false;
@@ -45,6 +57,7 @@ canvas.addEventListener("wheel", data => {
     engine.ChangeZoom(data);
 });
 
+console.log(engine.objects);
 let planet1 = new Planet({x: -5, y: -3}, image);
 let planet2 = new Planet({x: 0, y: 0}, image);
 let planet3 = new Planet({x: 15, y: 15}, image);
@@ -59,9 +72,7 @@ function RenderFrame(timestamp){
     engine.ctx.clearRect(0, 0, canvas.width, canvas.height);
     engine.SmoothZoom();
     engine.DrawGrid("grey", 0.1);
-    planet1.Draw(engine);
-    planet2.Draw(engine);
-    planet3.Draw(engine);
+    engine.objects.forEach(element => {element.Draw(engine)});
     //const camcoor = engine.VPToWorld(engine.mouseVPPos);
     //const camcoor = engine.mouseVPPos;
     const camcoor = {x: screen.width, y: screen.height};
