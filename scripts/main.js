@@ -1,5 +1,6 @@
 import {Planet} from "./modules.js";
 import {Engine} from "./modules.js";
+import { PLANET_SIZE } from "./modules.js";
 
 const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
@@ -22,8 +23,7 @@ socket.emit("get_planets");
 socket.on("receive_planets", data => {
     console.log(data);
     data.forEach(element => {
-        const planet = new Planet({x: element.position[0], y: element.position[1]}, image);
-        console.log("Planet: "+ element.position[0]);
+        const planet = new Planet({x: element.position[0], y: element.position[1]}, "circle", PLANET_SIZE, 10, image);
         engine.objects.push(planet);
     });
     console.log("Loaded planet.");
@@ -58,9 +58,9 @@ canvas.addEventListener("wheel", data => {
 });
 
 console.log(engine.objects);
-let planet1 = new Planet({x: -5, y: -3}, image);
-let planet2 = new Planet({x: 0, y: 0}, image);
-let planet3 = new Planet({x: 15, y: 15}, image);
+let planet1 = new Planet({x: -5, y: -3}, "circle", PLANET_SIZE, 10, image);
+let planet2 = new Planet({x: 0, y: 0},  "circle", PLANET_SIZE, 10, image);
+let planet3 = new Planet({x: 15, y: 15},  "circle", PLANET_SIZE, 10, image);
 engine.objects.push(planet1);
 engine.objects.push(planet2);
 engine.objects.push(planet3);

@@ -134,18 +134,14 @@ export default class Engine{
         let clickedObjects = this.objects.map(this.FindClickedObjects, engine);
         clickedObjects = clickedObjects.filter(obj => obj != null);
         clickedObjects.forEach(object => {
-            object.GotClicked();
+            object.Click();
         })
     }
 
     FindClickedObjects(object){
-        const objWPos = object.GetWPos(this);
         const mouseWPos = this.VPToWorld(this.mouseVPPos);
-        const hitbox = object.CheckCollision();
-        if ((objWPos.x-hitbox) <= mouseWPos.x && (objWPos.x+hitbox) >= mouseWPos.x){
-            if ((objWPos.y-hitbox) <= mouseWPos.y && (objWPos.y+hitbox) >= mouseWPos.y){
-                return object;
-            }
+        if (object.CheckIfClicked(this, mouseWPos)){
+            return object;
         }
         return null;
     }
