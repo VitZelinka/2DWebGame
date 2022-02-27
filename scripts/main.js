@@ -23,7 +23,7 @@ socket.emit("get_planets");
 socket.on("receive_planets", data => {
     console.log(data);
     data.forEach(element => {
-        const planet = new Planet({x: element.position[0], y: element.position[1]}, "circle", PLANET_SIZE, 10, image);
+        const planet = new Planet({x: element.position.x, y: element.position.y}, "circle", PLANET_SIZE, 10, image);
         engine.objects.push(planet);
     });
     console.log("Loaded planet.");
