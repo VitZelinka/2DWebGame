@@ -82,6 +82,7 @@ function RenderFrame(timestamp){
     engine.frameTime = timestamp;
     requestAnimationFrame(RenderFrame);
 }
+//git name test
 
 engine.MoveCam({x: -5, y: -3});
 RenderFrame();
