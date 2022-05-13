@@ -3,9 +3,8 @@ const http = require('http');
 const { Server } = require("socket.io");
 const path = require('path');
 const mongoose = require('mongoose');
-const db_planet = require('./models/db_planet.js');
-const db_user = require('./models/db_user.js');
-const session = require('express-session')
+const db = require('./models/models.js');
+const session = require('express-session');
 
 const uri = "mongodb+srv://app:memicko@cluster0.hwnkp.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 const chunkSize = 25;
@@ -29,14 +28,11 @@ app.use(session({
     saveUninitialized: false,
 }))
 
-io.on('connection', (socket) => {
-    console.log('a user connected');
-    socket.emit("kokot", "bruh");
-    socket.on("get_planets", async () => {
-        const data = await db_planet.find({});
-        socket.emit("receive_planets", data);
-    });
-});
+const regNetComm = require("./net_comm.js");
+const onConnection = (socket) => {
+    regNetComm(io, socket);
+}
+io.on("connection", onConnection);
 
 app.get('/', function(req, res) {
     if (!req.session.username){
@@ -70,7 +66,11 @@ app.get('/login', function(req, res){
 
 app.post('/login', async function(req, res){
     if (!req.session.username){
-        const user = await db_user.findOne({username: req.body.username});
+        const user = await db.user.findOne({username: req.body.username});
+        if (user == null){
+            res.redirect("/login");
+            return;
+        }
         console.log(req.body);
         console.log(user.username);
         if (user.password == req.body.password){
@@ -80,12 +80,19 @@ app.post('/login', async function(req, res){
     res.redirect("/");
 })
 
+app.get('/logout', function(req, res){
+    if (req.session.username){
+        delete req.session.username;
+    }
+    res.redirect("/login");
+})
+
 app.get('/test', function(req, res, next) {
     if (req.session.views) {
       req.session.views++
       res.setHeader('Content-Type', 'text/html')
       res.write('<p>views: ' + req.session.views + '</p>')
-      res.write('<p>expires in: ' + (req.session.cookie.maxAge / 1000) + 's</p>')
+      res.write('<p>expires in: ' + (req.session.cookie.maxAge/1) + 's</p>')
       res.end()
     } else {
       req.session.views = 1
