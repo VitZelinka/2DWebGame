@@ -29,6 +29,7 @@ app.use(session({
 }))
 
 const regNetComm = require("./net_comm.js");
+const { ObjectId } = require('mongodb');
 const onConnection = (socket) => {
     regNetComm(io, socket);
 }
@@ -44,11 +45,13 @@ app.get('/', function(req, res) {
 });
 
 app.get('/xd', async function(req, res) {
-    const position = {x: 25, y: 25};
-    const planet = new db_planet({
+    const position = {x: 5, y: 1};
+    const planet = new db.planet({
         position: position,
         chunk: {x: Math.floor(position.x/chunkSize),
-                y: Math.floor(position.y/chunkSize)}
+                y: Math.floor(position.y/chunkSize)},
+        owner: new ObjectId(req.session.userid),
+        entangled: [new ObjectId("6219f4770cadff24f2b13c33")]
     });
     await planet.save();
     console.log(planet);
@@ -75,6 +78,7 @@ app.post('/login', async function(req, res){
         console.log(user.username);
         if (user.password == req.body.password){
             req.session.username = user.username;
+            req.session.userid = user._id.toString();
         }
     }
     res.redirect("/");

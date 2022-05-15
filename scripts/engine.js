@@ -15,6 +15,7 @@ export default class Engine{
         this.posVPRef = {x: 0, y: 0};
         this.objects = [];
         this.frameTime = 1;
+        this.entangleDrawn = [];
     }
     
     VPToWorld(VPPos){

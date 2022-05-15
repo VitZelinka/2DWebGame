@@ -4,4 +4,4 @@ const db_user = require('./db_user.js');
 module.exports = {
     planet: db_planet,
     user: db_user
-  }
+}
