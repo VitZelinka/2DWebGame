@@ -18,9 +18,9 @@ socket.on("kokot", xd =>{
     console.log("message received :D", xd);
 })
 
-socket.emit("get_planets");
+socket.emit("c2s:get_planets");
 
-socket.on("receive_planets", data => {
+socket.on("s2c:receive_planets", data => {
     console.log(data);
     data.forEach(element => {
         const planet = new Planet(element.position, "circle", PLANET_SIZE, 10, image,
@@ -58,6 +58,17 @@ canvas.addEventListener("wheel", data => {
     engine.ChangeZoom(data);
 });
 
+window.addEventListener("keypress", key => {
+    switch (key.code) {
+        case "KeyA":
+            const pos = {x: engine.mouseVPPos.x+100, y: engine.mouseVPPos.y+100};
+            socket.emit("c2s:new_planet", engine.VPToCoor(pos));
+            break;
+        default:
+            break;
+    }
+});
+
 console.log(engine.objects);
 /*
 let planet1 = new Planet({x: -5, y: -3}, "circle", PLANET_SIZE, 10, image);
@@ -81,9 +92,9 @@ function RenderFrame(timestamp){
     });
     engine.entangleDrawn = [];
     engine.objects.forEach(element => {element.Draw(engine)});
-    //const camcoor = engine.VPToWorld(engine.mouseVPPos);
+    const camcoor = engine.VPToWorld(engine.mouseVPPos);
     //const camcoor = engine.mouseVPPos;
-    const camcoor = {x: screen.width, y: screen.height};
+    //const camcoor = {x: screen.width, y: screen.height};
     //console.log(window.devicePixelRatio);
     //console.log(engine.frameTime);
     coorText.textContent = "X: " + camcoor.x + " Y: " + camcoor.y;

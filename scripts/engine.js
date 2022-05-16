@@ -23,6 +23,10 @@ export default class Engine{
         return {x: (VPPos.x*pixRatio - Math.floor(this.canvas.width/2))/this.zoomLevel + this.camWPos.x,
                 y: (VPPos.y*pixRatio - Math.floor(this.canvas.height/2))/this.zoomLevel + this.camWPos.y};
     }
+
+    VPToCoor(VPPos){
+        return this.WorldToCoor(this.VPToWorld(VPPos));
+    }
     
     WorldToCoor(WPos){
         return {x: Math.floor(WPos.x/this.gridSize), y: Math.floor(WPos.y/this.gridSize)};
@@ -96,6 +100,16 @@ export default class Engine{
         this.ctx.beginPath();
         this.ctx.strokeStyle = color;
         this.ctx.lineWidth = width;
+        this.ctx.moveTo(startVPPos.x, startVPPos.y);
+        this.ctx.lineTo(endVPPos.x, endVPPos.y);
+        this.ctx.stroke();
+        this.ctx.closePath();
+    }
+
+    DrawLineDynamic(startVPPos, endVPPos, color, width){
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = color;
+        this.ctx.lineWidth = width*this.zoomLevel;
         this.ctx.moveTo(startVPPos.x, startVPPos.y);
         this.ctx.lineTo(endVPPos.x, endVPPos.y);
         this.ctx.stroke();

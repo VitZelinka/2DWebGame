@@ -22,14 +22,30 @@ app.use(express.static('styles'));
 app.use(express.static('assets'));
 app.use(express.static('scripts'));
 app.use(express.urlencoded({extended: false}));
-app.use(session({
+const sessionMiddleware = session({
     secret: 'random',
     resave: false,
     saveUninitialized: false,
-}))
+});
+app.use(sessionMiddleware);
+
+
+const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
+
+io.use(wrap(sessionMiddleware));
+
+// only allow authenticated users
+io.use((socket, next) => {
+  const session = socket.request.session;
+  if (session && session.username) {
+    next();
+  } else {
+    next(new Error("unauthorized"));
+  }
+});
+
 
 const regNetComm = require("./net_comm.js");
-const { ObjectId } = require('mongodb');
 const onConnection = (socket) => {
     regNetComm(io, socket);
 }
@@ -50,8 +66,8 @@ app.get('/xd', async function(req, res) {
         position: position,
         chunk: {x: Math.floor(position.x/chunkSize),
                 y: Math.floor(position.y/chunkSize)},
-        owner: new ObjectId(req.session.userid),
-        entangled: [new ObjectId("6219f4770cadff24f2b13c33")]
+        owner: new mongoose.ObjectId(req.session.userid),
+        entangled: [new mongoose.ObjectId("6219f4770cadff24f2b13c33")]
     });
     await planet.save();
     console.log(planet);
