@@ -1,14 +1,15 @@
 
 import {Interactable} from "./modules.js";
-import { PLANET_SIZE } from "./modules.js";
 
 export default class Planet extends Interactable {
-    constructor(CPos, colliderType, size, zHeight, image, owner, entangled, id){
+    constructor(CPos, colliderType, size, zHeight, image, owner, entangled, id, resources, mines){
         super(CPos, colliderType, size, zHeight);
         this.owner = owner;
         this.entangled = entangled;
         this.id = id;
         this.image = image;
+        this.resources = resources;
+        this.mines = mines;
     }
 
     Draw(engine) {
@@ -29,13 +30,22 @@ export default class Planet extends Interactable {
             if (skip) {continue;}
             engine.entangleDrawn.push({from: this.id, to: this.entangled[i]});
             let destCPos;
-            for (let j = 0; j < engine.objects.length; j++) {
-                if (engine.objects[j].id === this.entangled[i]) {
-                    destCPos = engine.objects[j].CPos;
+            for (let j = 0; j < engine.allObjects.length; j++) {
+                if (engine.allObjects[j].constructor.name === "Planet") {
+                    if (engine.allObjects[j].id === this.entangled[i]) {
+                        destCPos = engine.allObjects[j].CPos;
+                    }
                 }
             }
             engine.DrawLineDynamic(engine.CoorToVP(this.CPos), engine.CoorToVP(destCPos), "yellow", 8);
         }
     }
 
+    Click() {
+        console.log(this);
+    }
+
+    UpdateResourcesSec() {
+        this.resources.metal += 1 * this.mines.metal;
+    }
 }

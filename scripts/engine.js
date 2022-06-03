@@ -13,9 +13,11 @@ export default class Engine{
         this.zoomLevel = 0.3;
         this.camWPos = {x: 0, y: 0};
         this.posVPRef = {x: 0, y: 0};
-        this.objects = [];
+        this.objects = {planets: [], ownedPlanets: []};
+        this.allObjects = [];
         this.frameTime = 1;
         this.entangleDrawn = [];
+        this.TickSecond = false;
     }
     
     VPToWorld(VPPos){
@@ -146,7 +148,7 @@ export default class Engine{
     //---------- INPUT ----------
 
     HandleClick(engine){
-        let clickedObjects = this.objects.map(this.FindClickedObjects, engine);
+        let clickedObjects = this.allObjects.map(this.FindClickedObjects, engine);
         clickedObjects = clickedObjects.filter(obj => obj != null);
         clickedObjects.forEach(object => {
             object.Click();

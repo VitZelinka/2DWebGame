@@ -12,22 +12,25 @@ const engine = new Engine(canvas, ctx);
 canvas.width = Math.round(window.innerWidth*window.devicePixelRatio);
 canvas.height = Math.round(window.innerHeight*window.devicePixelRatio);
 
-var socket = io();
-
-socket.on("kokot", xd =>{
-    console.log("message received :D", xd);
-})
+let socket = io();
 
 socket.emit("c2s:get_planets");
-
-socket.on("s2c:receive_planets", data => {
+socket.on("s2c:get_planets", data => {
     console.log(data);
-    data.forEach(element => {
+    engine.objects.planets = [];
+    engine.objects.ownedPlanets = [];
+    data.ownedPlanets.forEach(element => {
+        const planet = new Planet(element.position, "circle", PLANET_SIZE, 10, image,
+                                  element.owner, element.entangled, element._id,
+                                  element.resources, element.mines);
+        engine.objects.ownedPlanets.push(planet);
+    });
+    data.otherPlanets.forEach(element => {
         const planet = new Planet(element.position, "circle", PLANET_SIZE, 10, image,
                                   element.owner, element.entangled, element._id);
-        engine.objects.push(planet);
+        engine.objects.planets.push(planet);
     });
-    console.log("Loaded planet.");
+    console.log(engine.objects);
 });
 
 
@@ -59,48 +62,65 @@ canvas.addEventListener("wheel", data => {
 });
 
 window.addEventListener("keypress", key => {
+    const pos = {x: engine.mouseVPPos.x+100*engine.zoomLevel, y: engine.mouseVPPos.y+100*engine.zoomLevel};
     switch (key.code) {
         case "KeyA":
-            const pos = {x: engine.mouseVPPos.x+100, y: engine.mouseVPPos.y+100};
             socket.emit("c2s:new_planet", engine.VPToCoor(pos));
+            break;
+        case "KeyD":
+            socket.emit("c2s:delete_planet", engine.VPToCoor(pos));
+            break;
+        case "KeyH":
+            engine.MoveCam({x: 0, y: 0});
             break;
         default:
             break;
     }
 });
 
-console.log(engine.objects);
-/*
-let planet1 = new Planet({x: -5, y: -3}, "circle", PLANET_SIZE, 10, image);
-let planet2 = new Planet({x: 0, y: 0},  "circle", PLANET_SIZE, 10, image);
-let planet3 = new Planet({x: 15, y: 15},  "circle", PLANET_SIZE, 10, image);
-engine.objects.push(planet1);
-engine.objects.push(planet2);
-engine.objects.push(planet3);
-*/
-
 
 function RenderFrame(timestamp){
+    engine.allObjects = [];
+    for (const key in engine.objects) {
+        engine.allObjects = engine.allObjects.concat(engine.objects[key]);
+    }
     engine.frameTime = timestamp - engine.frameTime;
     engine.ctx.clearRect(0, 0, canvas.width, canvas.height);
     engine.SmoothZoom();
     engine.DrawGrid("grey", 0.1);
-    engine.objects.forEach(element => {
+    engine.allObjects.forEach(element => {
         if (element.constructor.name === "Planet") {
             element.DrawEntangle(engine);
         }
     });
     engine.entangleDrawn = [];
-    engine.objects.forEach(element => {element.Draw(engine)});
+    engine.allObjects.forEach(element => {
+        if (element.constructor.name === "Planet") {
+            element.Draw(engine);
+        }
+    });
     const camcoor = engine.VPToWorld(engine.mouseVPPos);
     //const camcoor = engine.mouseVPPos;
     //const camcoor = {x: screen.width, y: screen.height};
     //console.log(window.devicePixelRatio);
     //console.log(engine.frameTime);
-    coorText.textContent = "X: " + camcoor.x + " Y: " + camcoor.y;
+    //coorText.textContent = "X: " + camcoor.x + " Y: " + camcoor.y;
+    try {
+        coorText.textContent = "Metal: " + engine.objects.ownedPlanets[24].resources.metal;
+    } catch (error) {}
+    if (engine.TickSecond) {
+        engine.TickSecond = false;
+        engine.objects.ownedPlanets.forEach(element => {
+            element.UpdateResourcesSec();
+        });
+    }
     engine.frameTime = timestamp;
     requestAnimationFrame(RenderFrame);
 }
 
+setInterval(() => {
+    engine.TickSecond = true;
+    console.log("ticked");
+}, 1000);
 engine.MoveCam({x: 3, y: 0});
 RenderFrame();

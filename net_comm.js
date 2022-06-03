@@ -4,11 +4,16 @@ const mongoose = require('mongoose');
 module.exports = (io, socket) => {
     const req = socket.request;
     console.log('User ' + req.session.username + ' connected');
-    socket.emit("kokot", "bruh");
+
+
     socket.on("c2s:get_planets", async () => {
-        const data = await db.planet.find({});
-        socket.emit("s2c:receive_planets", data);
+        let planets = {ownedPlanets: [], otherPlanets: []};
+        planets.otherPlanets = await db.planet.find({owner: {$ne: req.session.userid}},
+                    "position chunk owner entangled");
+        planets.ownedPlanets = await db.planet.find({owner: req.session.userid});
+        socket.emit("s2c:get_planets", planets);
     });
+
 
     socket.on("c2s:new_planet", async (data) => {
         const planet = new db.planet({
@@ -20,9 +25,25 @@ module.exports = (io, socket) => {
         });
         await planet.save();
         console.log("Planet added");
-        const p_data = await db.planet.find({});
-        socket.emit("s2c:receive_planets", p_data);
+        // get planets
+        let planets = {ownedPlanets: [], otherPlanets: []};
+        planets.otherPlanets = await db.planet.find({owner: {$ne: req.session.userid}},
+                    "position chunk owner entangled");
+        planets.ownedPlanets = await db.planet.find({owner: req.session.userid});
+        socket.emit("s2c:get_planets", planets);
     });
+
+
+    socket.on("c2s:delete_planet", async (data) => {
+        await db.planet.deleteOne({position: data});
+        // get planets
+        let planets = {ownedPlanets: [], otherPlanets: []};
+        planets.otherPlanets = await db.planet.find({owner: {$ne: req.session.userid}},
+                    "position chunk owner entangled");
+        planets.ownedPlanets = await db.planet.find({owner: req.session.userid});
+        socket.emit("s2c:get_planets", planets);
+    });
+
 
     socket.on("disconnect", () => {console.log("a user disconnected");});
 }
