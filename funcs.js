@@ -1,0 +1,14 @@
+
+exports.TestFunc = function () {
+    console.log("TEST FUNC :DDD");
+}
+
+exports.UpdatePlanetResDB = async function (planet) {
+    const updateTime = Date.now();
+    let secDiff = (updateTime - planet.resUpdate.getTime()) / 1000;
+    for (const key in planet.resources) {
+        planet.resources[key] = planet.resources[key] + (planet.mines[key] * secDiff);
+    }
+    planet.resUpdate = updateTime;
+    await planet.save();
+}

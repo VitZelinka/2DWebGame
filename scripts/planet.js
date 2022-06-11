@@ -10,6 +10,7 @@ export default class Planet extends Interactable {
         this.image = image;
         this.resources = resources;
         this.mines = mines;
+        this.resUpdated = Date.now();
     }
 
     Draw(engine) {
@@ -45,7 +46,12 @@ export default class Planet extends Interactable {
         console.log(this);
     }
 
-    UpdateResourcesSec() {
-        this.resources.metal += 1 * this.mines.metal;
+    UpdateResources() {
+        const updateTime = Date.now();
+        let secDiff = (updateTime - this.resUpdated) / 1000;
+        for (const key in this.resources) {
+            this.resources[key] = this.resources[key] + (this.mines[key] * secDiff);
+        }
+        this.resUpdated = updateTime;
     }
 }

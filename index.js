@@ -5,6 +5,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const db = require('./models/models.js');
 const session = require('express-session');
+const func = require('./funcs.js');
 
 const uri = "mongodb+srv://app:memicko@cluster0.hwnkp.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 const chunkSize = 25;
@@ -31,7 +32,6 @@ app.use(sessionMiddleware);
 
 
 const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
-
 io.use(wrap(sessionMiddleware));
 
 // only allow authenticated users
@@ -46,6 +46,7 @@ io.use((socket, next) => {
 
 
 const regNetComm = require("./net_comm.js");
+const req = require('express/lib/request');
 const onConnection = (socket) => {
     regNetComm(io, socket);
 }
@@ -61,16 +62,6 @@ app.get('/', function(req, res) {
 });
 
 app.get('/xd', async function(req, res) {
-    const position = {x: 5, y: 1};
-    const planet = new db.planet({
-        position: position,
-        chunk: {x: Math.floor(position.x/chunkSize),
-                y: Math.floor(position.y/chunkSize)},
-        owner: new mongoose.ObjectId(req.session.userid),
-        entangled: [new mongoose.ObjectId("6219f4770cadff24f2b13c33")]
-    });
-    await planet.save();
-    console.log(planet);
     console.log('Page servedxd');
     res.send("meme");
 });
@@ -120,5 +111,59 @@ app.get('/test', function(req, res, next) {
     }
 })
 
+
+
+
+
 server.listen(port);
 console.log('Server started at http://localhost:' + port);
+
+
+
+
+
+
+
+
+
+
+/*
+const crypto = require('crypto');
+function getRandom(secret, nonce) {
+    const fullSeed = crypto
+        .createHash("sha256")
+        .update(`${secret}:${nonce}`)
+        .digest("hex");
+
+    const seed = fullSeed.substr(0, 8);
+
+    return parseInt(seed, 16) % 15;
+}
+
+
+const fs = require('fs/promises');
+app.get('/rul', function(req, res) {
+    const from = Number(req.query.from);
+    const to = Number(req.query.to);
+    const secret = req.query.secret;
+    console.log(from, to, secret);
+    let output = [];
+    for (let index = from; index < to+1; index++) {
+        let strNum = index.toString();
+        let luckyNum = getRandom(secret, strNum);
+        output.push(luckyNum);
+    }
+
+    let finalStr = ""; 
+    output.forEach(element => {
+        finalStr += element.toString() + "\n";
+    });
+    finalStr += "X\n";
+    fs.appendFile('output.log', finalStr, err => {
+        if (err) {
+          console.error(err);
+        }
+    }); 
+    res.end("wrote "+output);
+})
+*/

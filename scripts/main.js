@@ -106,14 +106,16 @@ function RenderFrame(timestamp){
     //console.log(engine.frameTime);
     //coorText.textContent = "X: " + camcoor.x + " Y: " + camcoor.y;
     try {
-        coorText.textContent = "Metal: " + engine.objects.ownedPlanets[24].resources.metal;
+        coorText.textContent = "Metal: " + engine.objects.ownedPlanets[25].resources.metal;
     } catch (error) {}
+    // do this each second
     if (engine.TickSecond) {
         engine.TickSecond = false;
         engine.objects.ownedPlanets.forEach(element => {
-            element.UpdateResourcesSec();
+            element.UpdateResources();
         });
     }
+    // -------------------
     engine.frameTime = timestamp;
     requestAnimationFrame(RenderFrame);
 }

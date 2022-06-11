@@ -1,5 +1,6 @@
 const db = require('./models/models.js');
 const mongoose = require('mongoose');
+const func = require('./funcs.js');
 
 module.exports = (io, socket) => {
     const req = socket.request;
@@ -11,6 +12,9 @@ module.exports = (io, socket) => {
         planets.otherPlanets = await db.planet.find({owner: {$ne: req.session.userid}},
                     "position chunk owner entangled");
         planets.ownedPlanets = await db.planet.find({owner: req.session.userid});
+        planets.ownedPlanets.forEach(element => {
+            func.UpdatePlanetResDB(element);
+        });
         socket.emit("s2c:get_planets", planets);
     });
 
