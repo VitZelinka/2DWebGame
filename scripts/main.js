@@ -7,7 +7,7 @@ const ctx = canvas.getContext('2d');
 const image = document.getElementById('source');
 const coorText = document.getElementById("coordinates");
 
-const engine = new Engine(canvas, ctx);
+export const engine = new Engine(canvas, ctx);
 
 canvas.width = Math.round(window.innerWidth*window.devicePixelRatio);
 canvas.height = Math.round(window.innerHeight*window.devicePixelRatio);
@@ -73,6 +73,9 @@ window.addEventListener("keypress", key => {
         case "KeyH":
             engine.MoveCam({x: 0, y: 0});
             break;
+        case "KeyU":
+            engine.LoadUI("testui");
+            break;
         default:
             break;
     }
@@ -104,7 +107,7 @@ function RenderFrame(timestamp){
     //const camcoor = {x: screen.width, y: screen.height};
     //console.log(window.devicePixelRatio);
     //console.log(engine.frameTime);
-    //coorText.textContent = "X: " + camcoor.x + " Y: " + camcoor.y;
+    coorText.textContent = "X: " + camcoor.x + " Y: " + camcoor.y;
     try {
         coorText.textContent = "Metal: " + engine.objects.ownedPlanets[25].resources.metal;
     } catch (error) {}

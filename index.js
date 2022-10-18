@@ -111,59 +111,11 @@ app.get('/test', function(req, res, next) {
     }
 })
 
-
+app.get('/ui/*', function(req, res){
+    res.sendFile("./ui/"+req.params[0], {root: __dirname});
+})
 
 
 
 server.listen(port);
 console.log('Server started at http://localhost:' + port);
-
-
-
-
-
-
-
-
-
-
-/*
-const crypto = require('crypto');
-function getRandom(secret, nonce) {
-    const fullSeed = crypto
-        .createHash("sha256")
-        .update(`${secret}:${nonce}`)
-        .digest("hex");
-
-    const seed = fullSeed.substr(0, 8);
-
-    return parseInt(seed, 16) % 15;
-}
-
-
-const fs = require('fs/promises');
-app.get('/rul', function(req, res) {
-    const from = Number(req.query.from);
-    const to = Number(req.query.to);
-    const secret = req.query.secret;
-    console.log(from, to, secret);
-    let output = [];
-    for (let index = from; index < to+1; index++) {
-        let strNum = index.toString();
-        let luckyNum = getRandom(secret, strNum);
-        output.push(luckyNum);
-    }
-
-    let finalStr = ""; 
-    output.forEach(element => {
-        finalStr += element.toString() + "\n";
-    });
-    finalStr += "X\n";
-    fs.appendFile('output.log', finalStr, err => {
-        if (err) {
-          console.error(err);
-        }
-    }); 
-    res.end("wrote "+output);
-})
-*/

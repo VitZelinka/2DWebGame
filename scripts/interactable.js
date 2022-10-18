@@ -39,7 +39,7 @@ export default class Interactable {
         return false;
     }
 
-    Click(){
+    Click(engine){
         console.log(this.CPos);
     }
 }

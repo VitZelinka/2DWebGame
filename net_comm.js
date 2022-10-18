@@ -25,7 +25,8 @@ module.exports = (io, socket) => {
             chunk: {x: Math.floor(data.x/25),
                     y: Math.floor(data.y/25)},
             owner: new mongoose.Types.ObjectId(req.session.userid),
-            entangled: [new mongoose.Types.ObjectId("6219f4770cadff24f2b13c33")]
+            //entangled: [new mongoose.Types.ObjectId("6219f4770cadff24f2b13c33")]
+            entangled: []
         });
         await planet.save();
         console.log("Planet added");

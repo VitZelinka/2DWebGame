@@ -42,8 +42,9 @@ export default class Planet extends Interactable {
         }
     }
 
-    Click() {
+    Click(engine) {
         console.log(this);
+        engine.LoadUI("planetui", this);
     }
 
     UpdateResources() {

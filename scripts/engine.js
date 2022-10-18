@@ -18,6 +18,8 @@ export default class Engine{
         this.frameTime = 1;
         this.entangleDrawn = [];
         this.TickSecond = false;
+        this.uiOpen = false;
+        this.uiData;
     }
     
     VPToWorld(VPPos){
@@ -151,7 +153,7 @@ export default class Engine{
         let clickedObjects = this.allObjects.map(this.FindClickedObjects, engine);
         clickedObjects = clickedObjects.filter(obj => obj != null);
         clickedObjects.forEach(object => {
-            object.Click();
+            object.Click(this);
         })
     }
 
@@ -161,5 +163,32 @@ export default class Engine{
             return object;
         }
         return null;
+    }
+
+    //---------- UI ----------
+
+    LoadUI(UIname, data) {
+        this.CloseUI()
+        this.uiData = data;
+        let filename = UIname + ".html";
+        let UIelement = document.getElementById("ui");
+        let fragment;
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4) {
+                if (this.status == 200) {
+                    fragment = document.createRange().createContextualFragment(this.responseText);
+                    UIelement.appendChild(fragment.cloneNode(true));
+                }
+            }
+        }
+        xhttp.open("GET", "ui/"+filename, true);
+        xhttp.send();
+    }
+
+    CloseUI() {
+        let UIelement = document.getElementById("ui");
+        UIelement.innerHTML = "";
+        this.uiOpen = false;
     }
 }
