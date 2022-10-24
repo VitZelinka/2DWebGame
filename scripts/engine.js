@@ -17,11 +17,13 @@ export default class Engine{
         this.allObjects = [];
         this.frameTime = 1;
         this.entangleDrawn = [];
-        this.TickSecond = false;
         this.uiOpen = false;
         this.uiData;
+        this.TickEventSubsArray = [];
     }
     
+    //---------- COORDINATES ----------
+
     VPToWorld(VPPos){
         const pixRatio = window.devicePixelRatio;
         return {x: (VPPos.x*pixRatio - Math.floor(this.canvas.width/2))/this.zoomLevel + this.camWPos.x,
@@ -190,5 +192,24 @@ export default class Engine{
         let UIelement = document.getElementById("ui");
         UIelement.innerHTML = "";
         this.uiOpen = false;
+    }
+
+    //---------- BACKEND ----------
+
+    TickEventExecute() {
+        for (let i = 0; i < this.TickEventSubsArray.length; i++) {
+            this.TickEventSubsArray[i]();
+        }
+    }
+
+    TickEventSubscribe(func) {
+        this.TickEventSubsArray.push(func)
+    }
+
+    TickEventUnsubscribe(func) {
+        const index = this.TickEventSubsArray.indexOf(func);
+        if (index > -1) {
+            this.TickEventSubsArray.splice(index, 1);
+        }
     }
 }

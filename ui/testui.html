@@ -1,0 +1,14 @@
+<button class="butoun" id="testbutton">BUTOON</button>
+<p id="testvar"></p>
+<script type="module">
+    import {engine} from "./main.js";
+
+    function ButtonFunc() {
+        console.log("pressed button :D");
+        let testvar = document.getElementById("testvar");
+        testvar.innerHTML = engine.camWPos.x;
+        console.log(engine);
+    }
+    let testbutton = document.getElementById("testbutton");
+    testbutton.addEventListener("click", ButtonFunc);
+</script>

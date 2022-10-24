@@ -111,20 +111,16 @@ function RenderFrame(timestamp){
     try {
         coorText.textContent = "Metal: " + engine.objects.ownedPlanets[25].resources.metal;
     } catch (error) {}
-    // do this each second
-    if (engine.TickSecond) {
-        engine.TickSecond = false;
-        engine.objects.ownedPlanets.forEach(element => {
-            element.UpdateResources();
-        });
-    }
     // -------------------
     engine.frameTime = timestamp;
     requestAnimationFrame(RenderFrame);
 }
 
 setInterval(() => {
-    engine.TickSecond = true;
+    engine.objects.ownedPlanets.forEach(element => {
+        element.UpdateResources();
+    });
+    engine.TickEventExecute();
     console.log("ticked");
 }, 1000);
 engine.MoveCam({x: 3, y: 0});

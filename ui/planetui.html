@@ -1,0 +1,25 @@
+<div style="background-color:white; width: 200px; height: 100px;">
+    <div style="background-color: grey; display: flex; justify-content: flex-end;">
+        <button id="ui_close_button">X</button>
+    </div>
+    <div>
+        <p id="planet_resources">Resources:</p>
+    </div>
+</div>
+
+<script type="module">
+    import {engine} from "./main.js";
+    let closeButton = document.getElementById("ui_close_button");
+    closeButton.onclick = () => {
+        engine.TickEventUnsubscribe(UpdateUIResources);
+        engine.CloseUI();
+    };
+    let res = document.getElementById("planet_resources");
+    UpdateUIResources();
+    
+    function UpdateUIResources() {
+        res.innerHTML = "Resoures: " + engine.uiData.resources.metal;
+    }
+
+    engine.TickEventSubscribe(UpdateUIResources);
+</script>
