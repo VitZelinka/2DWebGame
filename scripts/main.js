@@ -77,8 +77,11 @@ window.addEventListener("keypress", key => {
             engine.LoadUI("testui");
             break;
         case "KeyE":
-            console.log("clicked E");
             engine.DebugEntangle(socket, engine.VPToCoor(pos));
+            break;
+        case "KeyR":
+            engine.DebugUntangle(socket, engine.VPToCoor(pos));
+            break;
         default:
             break;
     }

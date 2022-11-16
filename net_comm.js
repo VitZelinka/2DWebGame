@@ -49,6 +49,9 @@ module.exports = (io, socket) => {
         socket.emit("s2c:get_planets", planets);
     });
 
+
+    // ----------- DEBUG ------------------------
+
     socket.on("c2s:debug_entangle_planets", async (data) => {
         let planet = await db.planet.findById(data.first);
         planet.entangled.push(data.second);
@@ -60,6 +63,17 @@ module.exports = (io, socket) => {
         console.log("Succesfully entangled two planets.");
     });
 
+    socket.on("c2s:debug_untangle_planets", async (data) => {
+        let planet = await db.planet.findById(data.first);
+        let index = planet.entangled.indexOf(data.second);
+        planet.entangled.splice(index, 1);
+        await planet.save();
+
+        planet = await db.planet.findById(data.second);
+        index = planet.entangled.indexOf(data.first);
+        planet.entangled.splice(index, 1);
+        await planet.save();
+    });
 
     socket.on("disconnect", () => {console.log("a user disconnected");});
 }

@@ -23,6 +23,7 @@ export default class Engine{
         this.FrameEventSubsArray = [];
         // DEBUG VARS
         this.debugEntangleSelected = null;
+        this.debugUntangleSelected = null;
     }
     
     //---------- COORDINATES ----------
@@ -278,6 +279,33 @@ export default class Engine{
             }
             this.FrameEventUnsubscribe("debugEntangleDrawLine");
             this.debugEntangleSelected = null;
+        }
+    }
+
+    DebugUntangle(socket, planetCoor) {
+        let planet = this.FindPlanetByCoor(planetCoor);
+        if (this.debugUntangleSelected == null) {
+            if (planet !== null) {
+                this.FrameEventSubscribe((engine = this) => {
+                    engine.DebugEntangleDrawLine(this.CoorToVP(planetCoor), this.mouseVPPos, "red", 5, this)
+                }, "debugUntangleDrawLine");
+                this.debugUntangleSelected = planet;
+            }
+        } else {
+            if (planet !== null) {
+                let toUntangle = {first: this.debugUntangleSelected.id, second: planet.id};
+                socket.emit("c2s:debug_untangle_planets", toUntangle);
+                let index = this.debugUntangleSelected.entangled.findIndex((element) => {
+                    return element === planet.id;
+                });
+                this.debugUntangleSelected.entangled.splice(index, 1);
+                index = planet.entangled.findIndex((element) => {
+                    return element === this.debugUntangleSelected.id;
+                });
+                planet.entangled.splice(index, 1);
+            }
+            this.FrameEventUnsubscribe("debugUntangleDrawLine");
+            this.debugUntangleSelected = null;
         }
     }
 
