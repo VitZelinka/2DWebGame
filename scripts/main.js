@@ -76,6 +76,9 @@ window.addEventListener("keypress", key => {
         case "KeyU":
             engine.LoadUI("testui");
             break;
+        case "KeyE":
+            console.log("clicked E");
+            engine.DebugEntangle(socket, engine.VPToCoor(pos));
         default:
             break;
     }
@@ -91,6 +94,7 @@ function RenderFrame(timestamp){
     engine.ctx.clearRect(0, 0, canvas.width, canvas.height);
     engine.SmoothZoom();
     engine.DrawGrid("grey", 0.1);
+    engine.FrameEventExecute();
     engine.allObjects.forEach(element => {
         if (element.constructor.name === "Planet") {
             element.DrawEntangle(engine);
@@ -108,9 +112,6 @@ function RenderFrame(timestamp){
     //console.log(window.devicePixelRatio);
     //console.log(engine.frameTime);
     coorText.textContent = "X: " + camcoor.x + " Y: " + camcoor.y;
-    try {
-        coorText.textContent = "Metal: " + engine.objects.ownedPlanets[25].resources.metal;
-    } catch (error) {}
     // -------------------
     engine.frameTime = timestamp;
     requestAnimationFrame(RenderFrame);
@@ -120,6 +121,7 @@ setInterval(() => {
     engine.objects.ownedPlanets.forEach(element => {
         element.UpdateResources();
     });
+    console.log(engine.TickEventSubsArray);
     engine.TickEventExecute();
     console.log("ticked");
 }, 1000);

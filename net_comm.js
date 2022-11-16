@@ -49,6 +49,17 @@ module.exports = (io, socket) => {
         socket.emit("s2c:get_planets", planets);
     });
 
+    socket.on("c2s:debug_entangle_planets", async (data) => {
+        let planet = await db.planet.findById(data.first);
+        planet.entangled.push(data.second);
+        await planet.save();
+
+        planet = await db.planet.findById(data.second);
+        planet.entangled.push(data.first);
+        await planet.save();
+        console.log("Succesfully entangled two planets.");
+    });
+
 
     socket.on("disconnect", () => {console.log("a user disconnected");});
 }

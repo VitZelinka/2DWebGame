@@ -11,15 +11,16 @@
     import {engine} from "./main.js";
     let closeButton = document.getElementById("ui_close_button");
     closeButton.onclick = () => {
-        engine.TickEventUnsubscribe(UpdateUIResources);
+        engine.TickEventUnsubscribe("planetUi");
         engine.CloseUI();
     };
     let res = document.getElementById("planet_resources");
     UpdateUIResources();
     
     function UpdateUIResources() {
+        console.log("res updated");
         res.innerHTML = "Resoures: " + engine.uiData.resources.metal;
     }
 
-    engine.TickEventSubscribe(UpdateUIResources);
+    engine.TickEventSubscribe(() => {UpdateUIResources()}, "planetUi");
 </script>

@@ -20,6 +20,9 @@ export default class Engine{
         this.uiOpen = false;
         this.uiData;
         this.TickEventSubsArray = [];
+        this.FrameEventSubsArray = [];
+        // DEBUG VARS
+        this.debugEntangleSelected = null;
     }
     
     //---------- COORDINATES ----------
@@ -100,7 +103,7 @@ export default class Engine{
         }
     }
     
-    //---------- DRAWING ----------
+    //---------- RENDERING ----------
 
     DrawLine(startVPPos, endVPPos, color, width){
         this.ctx.beginPath();
@@ -196,20 +199,86 @@ export default class Engine{
 
     //---------- BACKEND ----------
 
+    // TICK EVENT SUBSCRIBING
     TickEventExecute() {
         for (let i = 0; i < this.TickEventSubsArray.length; i++) {
-            this.TickEventSubsArray[i]();
+            this.TickEventSubsArray[i].func();
         }
     }
 
-    TickEventSubscribe(func) {
-        this.TickEventSubsArray.push(func)
+    TickEventSubscribe(func, funcId) {
+        this.TickEventSubsArray.push({func: func, funcId: funcId});
     }
 
-    TickEventUnsubscribe(func) {
-        const index = this.TickEventSubsArray.indexOf(func);
+    TickEventUnsubscribe(funcId) {
+        let index = this.TickEventSubsArray.findIndex((element) => {
+            return element.funcId === funcId;
+        });
         if (index > -1) {
             this.TickEventSubsArray.splice(index, 1);
         }
     }
+    //-------------------------
+    // FRAME EVENT SUBSCRIBING
+    FrameEventExecute() {
+        for (let i = 0; i < this.FrameEventSubsArray.length; i++) {
+            this.FrameEventSubsArray[i].func();
+        }
+    }
+
+    FrameEventSubscribe(func, funcId) {
+        this.FrameEventSubsArray.push({func: func, funcId: funcId});
+    }
+
+    FrameEventUnsubscribe(funcId) {
+        let index = this.FrameEventSubsArray.findIndex((element) => {
+            return element.funcId === funcId;
+        });
+        if (index > -1) {
+            this.FrameEventSubsArray.splice(index, 1);
+        }
+    }
+    // ------------------------
+
+    //---------- HELPER FUNCTIONS ----------
+
+    FindPlanetByCoor(coor) {
+        let foundElem = null;
+        this.allObjects.forEach(element => {
+            if (element.constructor.name === "Planet") {
+                if (JSON.stringify(element.CPos) === JSON.stringify(coor)) {
+                    foundElem = element;
+                }
+            }
+        });
+        return foundElem;
+    }
+
+    DebugEntangleDrawLine(a, b, c , d, e) {
+        e.DrawLine(a, b ,c , d);
+    }
+
+    //---------- DEBUG ----------
+
+    DebugEntangle(socket, planetCoor) {
+        let planet = this.FindPlanetByCoor(planetCoor);
+        if (this.debugEntangleSelected == null) {
+            if (planet !== null) {
+                this.FrameEventSubscribe((engine = this) => {
+                    engine.DebugEntangleDrawLine(this.CoorToVP(planetCoor), this.mouseVPPos, "red", 5, this)
+                }, "debugEntangleDrawLine");
+                this.debugEntangleSelected = planet;
+            }
+        } else {
+            if (planet !== null) {
+                let toEntangle = {first: this.debugEntangleSelected.id, second: planet.id};
+                socket.emit("c2s:debug_entangle_planets", toEntangle);
+                this.debugEntangleSelected.entangled.push(planet.id);
+                planet.entangled.push(this.debugEntangleSelected.id);
+            }
+            this.FrameEventUnsubscribe("debugEntangleDrawLine");
+            this.debugEntangleSelected = null;
+        }
+    }
+
 }
