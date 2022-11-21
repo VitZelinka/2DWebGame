@@ -1,9 +1,10 @@
 import { ZOOM_SPEED, MIN_ZOOM, MAX_ZOOM, GRID_SIZE_REF } from "./config.js";
 
 export default class Engine{
-    constructor(canvas, ctx){
+    constructor(canvas, ctx, socket){
         this.canvas = canvas;
         this.ctx = ctx;
+        this.socket = socket;
         this.gridSize = GRID_SIZE_REF;
         this.dragging = false;
         this.clicking = false;
@@ -17,8 +18,11 @@ export default class Engine{
         this.allObjects = [];
         this.frameTime = 1;
         this.entangleDrawn = [];
+        // UI
         this.uiOpen = false;
         this.uiData;
+        this.uiOnQuit = [];
+        // EVENTS
         this.TickEventSubsArray = [];
         this.FrameEventSubsArray = [];
         // DEBUG VARS
@@ -190,12 +194,17 @@ export default class Engine{
         }
         xhttp.open("GET", "ui/"+filename, true);
         xhttp.send();
+        this.uiOpen = true;
     }
 
     CloseUI() {
+        for (let index = 0; index < this.uiOnQuit.length; index++) {
+            const element = this.uiOnQuit.pop();
+            element();
+        }
+        this.uiOpen = false;
         let UIelement = document.getElementById("ui");
         UIelement.innerHTML = "";
-        this.uiOpen = false;
     }
 
     //---------- BACKEND ----------
@@ -219,6 +228,11 @@ export default class Engine{
             this.TickEventSubsArray.splice(index, 1);
         }
     }
+
+    TickEventUiOnQuitUnsubscribe(funcId) {
+        this.uiOnQuit.push((e = this) => {e.TickEventUnsubscribe(funcId)});
+    }
+
     //-------------------------
     // FRAME EVENT SUBSCRIBING
     FrameEventExecute() {
@@ -261,7 +275,7 @@ export default class Engine{
 
     //---------- DEBUG ----------
 
-    DebugEntangle(socket, planetCoor) {
+    DebugEntangle(planetCoor) {
         let planet = this.FindPlanetByCoor(planetCoor);
         if (this.debugEntangleSelected == null) {
             if (planet !== null) {
@@ -273,7 +287,7 @@ export default class Engine{
         } else {
             if (planet !== null) {
                 let toEntangle = {first: this.debugEntangleSelected.id, second: planet.id};
-                socket.emit("c2s:debug_entangle_planets", toEntangle);
+                this.socket.emit("c2s:debug_entangle_planets", toEntangle);
                 this.debugEntangleSelected.entangled.push(planet.id);
                 planet.entangled.push(this.debugEntangleSelected.id);
             }
@@ -282,7 +296,7 @@ export default class Engine{
         }
     }
 
-    DebugUntangle(socket, planetCoor) {
+    DebugUntangle(planetCoor) {
         let planet = this.FindPlanetByCoor(planetCoor);
         if (this.debugUntangleSelected == null) {
             if (planet !== null) {
@@ -294,7 +308,7 @@ export default class Engine{
         } else {
             if (planet !== null) {
                 let toUntangle = {first: this.debugUntangleSelected.id, second: planet.id};
-                socket.emit("c2s:debug_untangle_planets", toUntangle);
+                this.socket.emit("c2s:debug_untangle_planets", toUntangle);
                 let index = this.debugUntangleSelected.entangled.findIndex((element) => {
                     return element === planet.id;
                 });
@@ -309,4 +323,8 @@ export default class Engine{
         }
     }
 
+    DebugSetPlanetData(data) {
+        console.log("DEBUGIGKGJGNG");
+        this.socket.emit("c2s:debug_set_planet_data", data);
+    }
 }

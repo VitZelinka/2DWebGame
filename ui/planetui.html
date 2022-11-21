@@ -11,7 +11,6 @@
     import {engine} from "./main.js";
     let closeButton = document.getElementById("ui_close_button");
     closeButton.onclick = () => {
-        engine.TickEventUnsubscribe("planetUi");
         engine.CloseUI();
     };
     let res = document.getElementById("planet_resources");
@@ -23,4 +22,6 @@
     }
 
     engine.TickEventSubscribe(() => {UpdateUIResources()}, "planetUi");
+    //engine.uiOnQuit.push(() => {engine.TickEventUnsubscribe("planetUi")});
+    engine.TickEventUiOnQuitUnsubscribe("planetUi");
 </script>

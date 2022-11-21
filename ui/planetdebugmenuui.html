@@ -1,0 +1,66 @@
+<div style="background-color:white; width: 400px;">
+    <div style="background-color: grey; display: flex; justify-content: flex-end;">
+        <button id="ui_close_button">X</button>
+    </div>
+    <div>
+        <div>
+            <h2>Info</h2>
+            <p id="debug_owner_elem">Owner: not loaded</p>
+            <p id="debug_id_elem">ID: not loaded</p>
+        </div>
+        <div>
+            <h2>Resources</h2>
+            <label>Metal:</label>
+            <input id="debug_metal_res_input" type="number"><br>
+            <label>Crystal:</label>
+            <input id="debug_crystal_res_input" type="number"><br>
+        </div>
+        <div>
+            <h2>Mines</h2>
+            <label>Metal:</label>
+            <input id="debug_metal_mine_input" type="number"><br>
+            <label>Crystal:</label>
+            <input id="debug_crystal_mine_input" type="number"><br>
+        </div>
+        <button id="debug_apply_button">Apply</button>
+    </div>
+</div>
+
+<script type="module">
+    import {engine} from "./main.js";
+    let closeButton = document.getElementById("ui_close_button");
+    closeButton.onclick = () => {
+        engine.CloseUI();
+    };
+
+
+    let applyButton = document.getElementById("debug_apply_button");
+    let ownerElem = document.getElementById("debug_owner_elem");
+    let idElem = document.getElementById("debug_id_elem");
+    let resMetalElem = document.getElementById("debug_metal_res_input");
+    let resCrystalElem = document.getElementById("debug_crystal_res_input");
+    let mineMetalElem = document.getElementById("debug_metal_mine_input");
+    let mineCrystalElem = document.getElementById("debug_crystal_mine_input");
+
+    try {
+        ownerElem.innerHTML = "Owner: " + engine.uiData.owner;
+        idElem.innerHTML = "ID: " + engine.uiData.id;
+        resMetalElem.placeholder = engine.uiData.resources.metal;
+        resCrystalElem.placeholder = engine.uiData.resources.crystals;
+        mineMetalElem.placeholder = engine.uiData.mines.metal;
+        mineCrystalElem.placeholder = engine.uiData.mines.crystals;
+    } catch (error) {}
+
+    function ApplyFunction() {
+        let changedData = {};
+        changedData.planetId = engine.uiData.id;
+        changedData.resMetal = resMetalElem.value;
+        changedData.resCrystal = resCrystalElem.value;
+        changedData.mineMetal = mineMetalElem.value;
+        changedData.mineCrystal = mineCrystalElem.value;
+        engine.DebugSetPlanetData(changedData);
+    }
+
+    applyButton.onclick = ApplyFunction;
+
+</script>

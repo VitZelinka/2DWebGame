@@ -7,12 +7,13 @@ const ctx = canvas.getContext('2d');
 const image = document.getElementById('source');
 const coorText = document.getElementById("coordinates");
 
-export const engine = new Engine(canvas, ctx);
+let socket = io();
+
+export const engine = new Engine(canvas, ctx, socket);
 
 canvas.width = Math.round(window.innerWidth*window.devicePixelRatio);
 canvas.height = Math.round(window.innerHeight*window.devicePixelRatio);
 
-let socket = io();
 
 socket.emit("c2s:get_planets");
 socket.on("s2c:get_planets", data => {
@@ -33,6 +34,9 @@ socket.on("s2c:get_planets", data => {
     console.log(engine.objects);
 });
 
+socket.on("s2c:debug_set_planet_data", (s = socket) => {
+    s.emit("c2s:get_planets");
+});
 
 window.addEventListener("resize", () => {
     canvas.width = Math.floor(window.innerWidth*window.devicePixelRatio);
@@ -73,14 +77,15 @@ window.addEventListener("keypress", key => {
         case "KeyH":
             engine.MoveCam({x: 0, y: 0});
             break;
-        case "KeyU":
-            engine.LoadUI("testui");
-            break;
         case "KeyE":
-            engine.DebugEntangle(socket, engine.VPToCoor(pos));
+            engine.DebugEntangle(engine.VPToCoor(pos));
             break;
         case "KeyR":
-            engine.DebugUntangle(socket, engine.VPToCoor(pos));
+            engine.DebugUntangle(engine.VPToCoor(pos));
+            break;
+        case "KeyU":
+            if (engine.uiOpen) {engine.CloseUI();}
+            else {engine.LoadUI("planetdebugmenuui", engine.FindPlanetByCoor(engine.VPToCoor(pos)));}
             break;
         default:
             break;
