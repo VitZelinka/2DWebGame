@@ -1,6 +1,6 @@
 import { ZOOM_SPEED, MIN_ZOOM, MAX_ZOOM, GRID_SIZE_REF } from "./config.js";
 
-export default class Engine{
+export default class Engine {
     constructor(canvas, ctx, socket){
         this.canvas = canvas;
         this.ctx = ctx;
@@ -199,9 +199,9 @@ export default class Engine{
 
     CloseUI() {
         for (let index = 0; index < this.uiOnQuit.length; index++) {
-            const element = this.uiOnQuit.pop();
-            element();
+            this.uiOnQuit[index]();
         }
+        this.uiOnQuit = [];
         this.uiOpen = false;
         let UIelement = document.getElementById("ui");
         UIelement.innerHTML = "";
@@ -257,7 +257,7 @@ export default class Engine{
 
     //---------- HELPER FUNCTIONS ----------
 
-    FindPlanetByCoor(coor) {
+    GetPlanetByCoor(coor) {
         let foundElem = null;
         this.allObjects.forEach(element => {
             if (element.constructor.name === "Planet") {
@@ -269,14 +269,27 @@ export default class Engine{
         return foundElem;
     }
 
+    GetPlanetById_Unowned(id) {
+        return this.objects.planets.filter((element) => {
+            return element.id === id;
+        });
+    }
+
+    GetPlanetById_Owned(id) {
+        return this.objects.ownedPlanets.filter((element) => {
+            return element.id === id;
+        });
+    }
+
+    
+    //---------- DEBUG ----------
+    
     DebugEntangleDrawLine(a, b, c , d, e) {
         e.DrawLine(a, b ,c , d);
     }
 
-    //---------- DEBUG ----------
-
     DebugEntangle(planetCoor) {
-        let planet = this.FindPlanetByCoor(planetCoor);
+        let planet = this.GetPlanetByCoor(planetCoor);
         if (this.debugEntangleSelected == null) {
             if (planet !== null) {
                 this.FrameEventSubscribe((engine = this) => {
@@ -297,7 +310,7 @@ export default class Engine{
     }
 
     DebugUntangle(planetCoor) {
-        let planet = this.FindPlanetByCoor(planetCoor);
+        let planet = this.GetPlanetByCoor(planetCoor);
         if (this.debugUntangleSelected == null) {
             if (planet !== null) {
                 this.FrameEventSubscribe((engine = this) => {

@@ -1,10 +1,11 @@
 const db = require('./models/models.js');
 const mongoose = require('mongoose');
 const func = require('./funcs.js');
+const resFuncs = require("./server_calculations.js");
 
 module.exports = (io, socket) => {
     const req = socket.request;
-    console.log('User ' + req.session.username + ' connected');
+    console.log('User: '+req.session.username+' with ID: '+req.session.userid+' connected.');
 
 
     socket.on("c2s:get_planets", async () => {
@@ -50,8 +51,29 @@ module.exports = (io, socket) => {
         socket.emit("s2c:get_planets", planets);
     });
 
+    // ------------- BUILDING UPGRADING ----------------
+
+    socket.on("c2s:upgrade_mine", async (data, callback) => {
+        const toUpgrade = data.toUpgrade;
+        let planet = await db.planet.findById(data.planetId);
+        func.UpdatePlanetRes(planet);
+        const cost = resFuncs.cost[toUpgrade](planet.mines[toUpgrade]);
+        if (cost > planet.resources[toUpgrade]) {
+            callback(false);
+        } else {
+            planet.mines[toUpgrade]++;
+            planet.resources[toUpgrade] -= cost;
+            await planet.save();
+            callback(true);
+        }
+    });
 
     // ----------- DEBUG ------------------------
+
+    socket.on("c2s:test", (data) => {
+        console.log("Test Connection: "+data);
+        socket.emit("s2c:test", "Connection Received");
+    });
 
     socket.on("c2s:debug_entangle_planets", async (data) => {
         let planet = await db.planet.findById(data.first);

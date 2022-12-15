@@ -81,8 +81,8 @@ app.post('/login', async function(req, res){
             res.redirect("/login");
             return;
         }
-        console.log(req.body);
-        console.log(user.username);
+        //console.log(req.body);
+        //console.log(user.username);
         if (user.password == req.body.password){
             req.session.username = user.username;
             req.session.userid = user._id.toString();

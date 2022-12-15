@@ -1,9 +1,10 @@
-<div style="background-color:white; width: 200px; height: 100px;">
+<div style="background-color:white; width: 200px; height: 200px;">
     <div style="background-color: grey; display: flex; justify-content: flex-end;">
         <button id="ui_close_button">X</button>
     </div>
     <div>
         <p id="planet_resources">Resources:</p>
+        <button id="test_upgrade">Upgrade</button>
     </div>
 </div>
 
@@ -13,15 +14,42 @@
     closeButton.onclick = () => {
         engine.CloseUI();
     };
+    let upgradeButton = document.getElementById("test_upgrade");
     let res = document.getElementById("planet_resources");
+
+    upgradeButton.onclick = () => {
+        engine.socket.emit("c2s:upgrade_mine", {planetId: engine.uiData.id,
+            toUpgrade: "metal"}, (response) => {
+                console.log(response)
+                if (response) {
+                    const newRes = engine.uiData.resources.metal - 100;
+                    res.innerHTML = "Resoures: " + newRes;
+                    engine.uiData.resources.metal = newRes;
+                    engine.uiData.mines.metal++;
+                    ButtonController();
+                }
+            });
+    };
+
     UpdateUIResources();
+    ButtonController();
     
     function UpdateUIResources() {
         console.log("res updated");
         res.innerHTML = "Resoures: " + engine.uiData.resources.metal;
     }
 
+    function ButtonController() {
+        if (engine.uiData.resources.metal < 100) {
+            upgradeButton.setAttribute("disabled", "");
+        } else {
+            upgradeButton.removeAttribute("disabled");
+        }
+    }
+
+    engine.TickEventSubscribe(() => {ButtonController()}, "planetUiUpgrade")
     engine.TickEventSubscribe(() => {UpdateUIResources()}, "planetUi");
     //engine.uiOnQuit.push(() => {engine.TickEventUnsubscribe("planetUi")});
     engine.TickEventUiOnQuitUnsubscribe("planetUi");
+    engine.TickEventUiOnQuitUnsubscribe("planetUiUpgrade");
 </script>

@@ -85,7 +85,7 @@ window.addEventListener("keypress", key => {
             break;
         case "KeyU":
             if (engine.uiOpen) {engine.CloseUI();}
-            else {engine.LoadUI("planetdebugmenuui", engine.FindPlanetByCoor(engine.VPToCoor(pos)));}
+            else {engine.LoadUI("planetdebugmenuui", engine.GetPlanetByCoor(engine.VPToCoor(pos)));}
             break;
         default:
             break;
@@ -130,6 +130,7 @@ setInterval(() => {
         element.UpdateResources();
     });
     console.log(engine.TickEventSubsArray);
+    //console.log(engine.uiOnQuit);
     engine.TickEventExecute();
     console.log("ticked");
 }, 1000);

@@ -9,7 +9,7 @@ const planetSchema = new mongoose.Schema({
                 crystals: {type: Number, default: 0}},
     mines: {metal: {type: Number, default: 0},
             crystals: {type: Number, default: 0}},
-    construction: {building: {type: String, default: ""}, doneAt: Date},
+    construction: {mine: {type: String, default: ""}, doneAt: Date},
     resUpdate: {type: Date, default: Date.now}
 })
 
