@@ -87,6 +87,11 @@ window.addEventListener("keypress", key => {
             if (engine.uiOpen) {engine.CloseUI();}
             else {engine.LoadUI("planetdebugmenuui", engine.GetPlanetByCoor(engine.VPToCoor(pos)));}
             break;
+        case "KeyP":
+            socket.emit("debug:get_job", "637e31aaab84fa789e443004", (response) => {
+                console.log(response);
+            });
+            break;
         default:
             break;
     }
@@ -129,10 +134,13 @@ setInterval(() => {
     engine.objects.ownedPlanets.forEach(element => {
         element.UpdateResources();
     });
-    console.log(engine.TickEventSubsArray);
+    socket.emit("debug:get_job", "637e31aaab84fa789e443004", (response) => {
+        console.log(response);
+    });
+    //console.log(engine.TickEventSubsArray);
     //console.log(engine.uiOnQuit);
     engine.TickEventExecute();
-    console.log("ticked");
+    //console.log("ticked");
 }, 1000);
 engine.MoveCam({x: 3, y: 0});
 RenderFrame();

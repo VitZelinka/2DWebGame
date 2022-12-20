@@ -13,8 +13,9 @@ module.exports = (io, socket) => {
         planets.otherPlanets = await db.planet.find({owner: {$ne: req.session.userid}},
                     "position chunk owner entangled");
         planets.ownedPlanets = await db.planet.find({owner: req.session.userid});
-        planets.ownedPlanets.forEach(element => {
-            func.UpdatePlanetResDB(element);
+        planets.ownedPlanets.forEach(async (element) => {
+            //func.UpdatePlanetResDB(element);
+            func.RefreshPlanet(element);
         });
         socket.emit("s2c:get_planets", planets);
         console.log("sent planets");
@@ -61,8 +62,10 @@ module.exports = (io, socket) => {
         if (cost > planet.resources[toUpgrade]) {
             callback(false);
         } else {
-            planet.mines[toUpgrade]++;
-            planet.resources[toUpgrade] -= cost;
+            console.log("Successful request to upgrade a mine")
+            //planet.jobQueue.push({jobType: "resUpdate", jobInfo: 0, finishAt: 0});
+            planet.jobQueue.push({jobType: "mineUpgrade", jobInfo: "metal", finishAt: Date.now()+10000});
+            planet.resources[toUpgrade] -= cost; // TODO: push resUpdate job after mineUpgrade, edit previous resUpdate.jobInfo to correct time
             await planet.save();
             callback(true);
         }
@@ -115,6 +118,12 @@ module.exports = (io, socket) => {
         await planet.save();
         socket.emit("s2c:debug_set_planet_data");
         console.log("Set new planet data.");
+    });
+
+    socket.on("debug:get_job", async (data, callback) => {
+        let planet = await db.planet.findById(data);
+        func.RefreshPlanet(planet);
+        callback(planet.jobQueue);
     });
 
     socket.on("disconnect", () => {console.log("a user disconnected");});

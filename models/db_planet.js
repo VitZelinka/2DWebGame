@@ -9,7 +9,9 @@ const planetSchema = new mongoose.Schema({
                 crystals: {type: Number, default: 0}},
     mines: {metal: {type: Number, default: 0},
             crystals: {type: Number, default: 0}},
-    construction: {mine: {type: String, default: ""}, doneAt: Date},
+    jobQueue: [{jobType: {type: String}, 
+                jobInfo: {type: Object}, 
+                finishAt: {type: Date}}],
     resUpdate: {type: Date, default: Date.now}
 })
 
