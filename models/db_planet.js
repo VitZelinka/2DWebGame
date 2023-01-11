@@ -11,7 +11,7 @@ const planetSchema = new mongoose.Schema({
             crystals: {type: Number, default: 0}},
     jobQueue: [{jobType: {type: String}, 
                 jobInfo: {type: Object}, 
-                finishAt: {type: Date}}],
+                finishAt: {type: Number}}],
     resUpdate: {type: Date, default: Date.now}
 })
 

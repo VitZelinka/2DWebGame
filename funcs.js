@@ -7,7 +7,7 @@ exports.TestFunc = function () {
 
 exports.UpdatePlanetResDB = async function (planet) {
     const updateTime = Date.now();
-    let secDiff = (updateTime - planet.resUpdate.getTime()) / 1000;
+    let secDiff = (updateTime - planet.resUpdate) / 1000;
     for (const [key, value] of Object.entries(planet.resources)) {
         planet.resources[key] = planet.resources[key] + resFuncs.mined[key](planet.mines[key], secDiff);
     }
@@ -17,16 +17,16 @@ exports.UpdatePlanetResDB = async function (planet) {
 
 exports.UpdatePlanetRes = function (planet) {
     const updateTime = Date.now();
-    let secDiff = (updateTime - planet.resUpdate.getTime()) / 1000;
+    let secDiff = (updateTime - planet.resUpdate) / 1000;
     for (const [key, value] of Object.entries(planet.resources)) {
         planet.resources[key] = planet.resources[key] + resFuncs.mined[key](planet.mines[key], secDiff);
     }
     planet.resUpdate = updateTime;
 }
 
-UpdatePlanetRes_CTime = function (planet, date) {
+exports.UpdatePlanetRes_CTime = function (planet, date) {
     const updateTime = date;
-    let secDiff = (updateTime - planet.resUpdate.getTime()) / 1000;
+    let secDiff = (updateTime - planet.resUpdate) / 1000;
     for (const [key, value] of Object.entries(planet.resources)) {
         planet.resources[key] = planet.resources[key] + resFuncs.mined[key](planet.mines[key], secDiff);
     }
@@ -38,30 +38,41 @@ exports.RefreshPlanet = async function (planet) {
     let newQueue = [];
     const currentTime = Date.now();
     const loop_n = planet.jobQueue.length;
-    for (let i = 0; i < loop_n; i++) {
+    for (let i = 0; i < loop_n; i++) { // iterate thru every job
         console.log("I ran the loop");
         let min = planet.jobQueue[0].finishAt;
         let minJob = planet.jobQueue[0];
         let jobIndex = 0;
-        for (const job of planet.jobQueue) {
+        for (const job of planet.jobQueue) { // find smallest (time) job, store in minJob
             if (job.finishAt < min) {min = job.finishAt; minJob = job; jobIndex++;}
         }
         switch (minJob.jobType) { // finishedAt = when to calculate the job
             case "resUpdate":
-                if (minJob.finishAt.getTime() == 0) { // means do now
+                const jobFinishAt = minJob.finishAt;
+                if (jobFinishAt == 0) { // means do now
                     if (minJob.jobInfo == 0) { // means do until now
-                        func.UpdatePlanetRes(planet); // TODO: this is wrong, idk brui fix it:D
+                        func.UpdatePlanetRes_CTime(planet, currentTime);
+                        newQueue.push(minJob);
                     } else {
                         if (minJob.jobInfo > currentTime) {
-                            func.UpdatePlanetRes(planet);
+                            func.UpdatePlanetRes_CTime(planet, currentTime);
+                            newQueue.push(minJob);
                         } else {
                             func.UpdatePlanetRes_CTime(planet, minJob.jobInfo);
+                            minJob.jobInfo = 0; // readds default job
+                            newQueue.push(minJob);
                         }
                     }
-                    console.log("Pushed to new: ", minJob.jobType);
-                    newQueue.push(minJob);
+                } else if (jobFinishAt > currentTime) { // TODO: finish the "else" section
+                    newQueue.push(minJob); // just skips
                 } else {
-                    func.UpdatePlanetRes_CTime(planet, minJob.finishAt); // TODO: readd resUpdate to index 0 
+                    if (minJob.jobInfo == 0) {
+                        func.UpdatePlanetRes_CTime(planet, currentTime);
+                    } else if (minJob.jobInfo > currentTime) {
+                        newQueue.push(minJob); // just skips
+                    } else {
+                        func.UpdatePlanetRes_CTime(planet, minJob.jobInfo);
+                    }
                 }
                 console.log("Spliced: ", planet.jobQueue[jobIndex].jobType);
                 planet.jobQueue.splice(jobIndex, 1);
@@ -85,5 +96,5 @@ exports.RefreshPlanet = async function (planet) {
         }
     }
     planet.jobQueue = newQueue;
-    await planet.save();
+    //await planet.save();
 }
