@@ -33,18 +33,19 @@ exports.UpdatePlanetRes_CTime = function (planet, date) {
     planet.resUpdate = updateTime;
 }
 
-exports.RefreshPlanet = async function (planet) {
-    console.log("Refreshing planet");
+
+exports.RefreshPlanet = async function (planet) { // NOTE: might be a good idea to rewrite this with a linked list
     let newQueue = [];
     const currentTime = Date.now();
     const loop_n = planet.jobQueue.length;
     for (let i = 0; i < loop_n; i++) { // iterate thru every job
-        console.log("I ran the loop");
         let min = planet.jobQueue[0].finishAt;
         let minJob = planet.jobQueue[0];
         let jobIndex = 0;
+        let tmpIndex = 0;
         for (const job of planet.jobQueue) { // find smallest (time) job, store in minJob
-            if (job.finishAt < min) {min = job.finishAt; minJob = job; jobIndex++;}
+            if (job.finishAt < min) {min = job.finishAt; minJob = job; jobIndex = tmpIndex;}
+            tmpIndex++;
         }
         switch (minJob.jobType) { // finishedAt = when to calculate the job
             case "resUpdate":
@@ -63,7 +64,7 @@ exports.RefreshPlanet = async function (planet) {
                             newQueue.push(minJob);
                         }
                     }
-                } else if (jobFinishAt > currentTime) { // TODO: finish the "else" section
+                } else if (jobFinishAt > currentTime) {
                     newQueue.push(minJob); // just skips
                 } else {
                     if (minJob.jobInfo == 0) {
@@ -74,18 +75,14 @@ exports.RefreshPlanet = async function (planet) {
                         func.UpdatePlanetRes_CTime(planet, minJob.jobInfo);
                     }
                 }
-                console.log("Spliced: ", planet.jobQueue[jobIndex].jobType);
                 planet.jobQueue.splice(jobIndex, 1);
                 break;
 
             case "mineUpgrade":
-                console.log("Upgrading mine");
                 if (minJob.finishAt > currentTime) {
-                    console.log("Not yet");
                     newQueue.push(minJob);
                     planet.jobQueue.splice(jobIndex, 1);
                 } else {
-                    console.log("Upgraded", jobIndex);
                     planet.mines[minJob.jobInfo]++;
                     planet.jobQueue.splice(jobIndex, 1);
                 }
@@ -96,5 +93,5 @@ exports.RefreshPlanet = async function (planet) {
         }
     }
     planet.jobQueue = newQueue;
-    //await planet.save();
+    await planet.save();
 }

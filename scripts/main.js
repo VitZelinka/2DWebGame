@@ -23,7 +23,7 @@ socket.on("s2c:get_planets", data => {
     data.ownedPlanets.forEach(element => {
         const planet = new Planet(element.position, "circle", PLANET_SIZE, 10, image,
                                   element.owner, element.entangled, element._id,
-                                  element.resources, element.mines);
+                                  element.resources, element.mines, element.jobQueue);
         engine.objects.ownedPlanets.push(planet);
     });
     data.otherPlanets.forEach(element => {
@@ -134,9 +134,11 @@ setInterval(() => {
     engine.objects.ownedPlanets.forEach(element => {
         element.UpdateResources();
     });
+    /*
     socket.emit("debug:get_job", "637e31aaab84fa789e443004", (response) => {
         console.log(response);
     });
+    */
     //console.log(engine.TickEventSubsArray);
     //console.log(engine.uiOnQuit);
     engine.TickEventExecute();

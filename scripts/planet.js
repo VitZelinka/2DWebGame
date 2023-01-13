@@ -3,7 +3,7 @@ import {Interactable} from "./modules.js";
 import { ResFuncs } from "./modules.js";
 
 export default class Planet extends Interactable {
-    constructor(CPos, colliderType, size, zHeight, image, owner, entangled, id, resources, mines){
+    constructor(CPos, colliderType, size, zHeight, image, owner, entangled, id, resources, mines, jobQueue){
         super(CPos, colliderType, size, zHeight);
         this.owner = owner;
         this.entangled = entangled;
@@ -12,6 +12,7 @@ export default class Planet extends Interactable {
         this.resources = resources;
         this.mines = mines;
         this.resUpdated = Date.now();
+        this.jobQueue = jobQueue;
     }
 
     Draw(engine) {

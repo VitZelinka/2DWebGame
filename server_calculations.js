@@ -3,7 +3,7 @@ function CalculateMetalMined(mineLvl, secDiff) {
     return mineLvl * secDiff;
 }
 
-function CalculateCrystalsMined(mineLvl, secDiff) {
+function CalculateCrystalMined(mineLvl, secDiff) {
     return mineLvl * secDiff;
 }
 
@@ -16,8 +16,8 @@ function CalculateCrystalUpgradeCost(mineLvl) {
 }
 
 const MineCalculationFunctions = {mined: {metal: CalculateMetalMined,
-                                    crystals: CalculateCrystalsMined},
+                                    crystal: CalculateCrystalMined},
                                   cost: {metal: CalculateMetalUpgradeCost,
-                                    crystals: CalculateCrystalUpgradeCost}
+                                    crystal: CalculateCrystalUpgradeCost}
                                  };
 module.exports = MineCalculationFunctions;

@@ -14,7 +14,6 @@ module.exports = (io, socket) => {
                     "position chunk owner entangled");
         planets.ownedPlanets = await db.planet.find({owner: req.session.userid});
         planets.ownedPlanets.forEach(async (element) => {
-            //func.UpdatePlanetResDB(element);
             func.RefreshPlanet(element);
         });
         socket.emit("s2c:get_planets", planets);
@@ -28,8 +27,8 @@ module.exports = (io, socket) => {
             chunk: {x: Math.floor(data.x/25),
                     y: Math.floor(data.y/25)},
             owner: new mongoose.Types.ObjectId(req.session.userid),
-            //entangled: [new mongoose.Types.ObjectId("6219f4770cadff24f2b13c33")]
-            entangled: []
+            entangled: [],
+            jobQueue: [{jobType: "resUpdate", jobInfo: 0, finishAt: 0}]
         });
         await planet.save();
         console.log("Planet added");
@@ -57,7 +56,7 @@ module.exports = (io, socket) => {
     socket.on("c2s:upgrade_mine", async (data, callback) => {
         const toUpgrade = data.toUpgrade;
         let planet = await db.planet.findById(data.planetId);
-        func.UpdatePlanetRes(planet);
+        func.RefreshPlanet(planet);
         const cost = resFuncs.cost[toUpgrade](planet.mines[toUpgrade]);
         if (cost > planet.resources[toUpgrade]) {
             callback(false);
@@ -103,17 +102,18 @@ module.exports = (io, socket) => {
 
     socket.on("c2s:debug_set_planet_data", async (data) => {
         let planet = await db.planet.findById(data.planetId);
+        planet.resUpdate = Date.now();
         if (data.resMetal !== "") {
             planet.resources.metal = Number(data.resMetal);
         }
         if (data.resCrystal !== "") {
-            planet.resources.crystals = Number(data.resCrystal);
+            planet.resources.crystal = Number(data.resCrystal);
         }
         if (data.mineMetal !== "") {
             planet.mines.metal = Number(data.mineMetal);
         }
         if (data.mineCrystal !== "") {
-            planet.mines.crystals = Number(data.mineCrystal);
+            planet.mines.crystal = Number(data.mineCrystal);
         }
         await planet.save();
         socket.emit("s2c:debug_set_planet_data");
