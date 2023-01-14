@@ -134,11 +134,9 @@ setInterval(() => {
     engine.objects.ownedPlanets.forEach(element => {
         element.UpdateResources();
     });
-    /*
-    socket.emit("debug:get_job", "637e31aaab84fa789e443004", (response) => {
+    socket.emit("debug:get_job", "63c13172e2389b37c6833079", (response) => {
         console.log(response);
     });
-    */
     //console.log(engine.TickEventSubsArray);
     //console.log(engine.uiOnQuit);
     engine.TickEventExecute();

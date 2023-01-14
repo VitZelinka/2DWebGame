@@ -15,6 +15,7 @@ module.exports = (io, socket) => {
         planets.ownedPlanets = await db.planet.find({owner: req.session.userid});
         planets.ownedPlanets.forEach(async (element) => {
             func.RefreshPlanet(element);
+            await element.save();
         });
         socket.emit("s2c:get_planets", planets);
         console.log("sent planets");
@@ -62,9 +63,8 @@ module.exports = (io, socket) => {
             callback(false);
         } else {
             console.log("Successful request to upgrade a mine")
-            //planet.jobQueue.push({jobType: "resUpdate", jobInfo: 0, finishAt: 0});
-            planet.jobQueue.push({jobType: "mineUpgrade", jobInfo: "metal", finishAt: Date.now()+10000});
-            planet.resources[toUpgrade] -= cost; // TODO: push resUpdate job after mineUpgrade, edit previous resUpdate.jobInfo to correct time
+            func.AddJobToQ(planet, {jobType: "mineUpgrade", jobInfo: toUpgrade, finishAt: Date.now()+10000});
+            planet.resources[toUpgrade] -= cost;
             await planet.save();
             callback(true);
         }
@@ -123,6 +123,7 @@ module.exports = (io, socket) => {
     socket.on("debug:get_job", async (data, callback) => {
         let planet = await db.planet.findById(data);
         func.RefreshPlanet(planet);
+        await planet.save();
         callback(planet.jobQueue);
     });
 

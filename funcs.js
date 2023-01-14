@@ -34,7 +34,7 @@ exports.UpdatePlanetRes_CTime = function (planet, date) {
     planet.resUpdate = updateTime;
 }
 
-exports.RefreshPlanet = async function (planet) {
+exports.RefreshPlanet = function (planet) {
     let newQueue = [];
     const currentTime = Date.now();
     const loop_n = planet.jobQueue.length;
@@ -45,7 +45,7 @@ exports.RefreshPlanet = async function (planet) {
         switch (job.jobType) { // finishedAt = when to calculate the job
             case "resUpdate":
                 if (job.finishAt > job.jobInfo && job.jobInfo !== 0){break;}
-                
+
                 if (job.finishAt == 0) { // means do now
                     if (job.jobInfo == 0) { // means do until now
                         func.UpdatePlanetRes_CTime(planet, currentTime);
@@ -85,9 +85,7 @@ exports.RefreshPlanet = async function (planet) {
                 break;
         }
     }
-
     planet.jobQueue = newQueue;
-    await planet.save();
 }
 
 
