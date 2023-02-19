@@ -28,6 +28,8 @@ export default class Engine {
         // DEBUG VARS
         this.debugEntangleSelected = null;
         this.debugUntangleSelected = null;
+        this.timeOffset;
+        this.time = () => {return Date.now() + this.timeOffset;}
     }
     
     //---------- COORDINATES ----------

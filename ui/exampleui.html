@@ -1,0 +1,50 @@
+
+<div>
+    <button class="butoun" id="examplebutton">EXAMPLE BUTTON</button>
+    <p id="examplevar"></p>
+</div>
+
+<script type="module">
+    // IMPORT ENGINE
+    import {engine} from "./main.js";
+
+
+    // CREATE BUTTON WITH FUNCTION
+    let examplebutton = document.getElementById("examplebutton");
+    examplebutton.onclick = () => {
+        console.log("pressed button :D");
+        let examplevar = document.getElementById("examplevar");
+        examplevar.innerHTML = engine.camWPos.x;
+    }
+    
+
+    // SOCKET CALL WITH CALLBACK
+    examplebutton.onclick = () => {
+        engine.socket.emit("c2s:example", "data", (response) => {
+            console.log(response);
+        });
+    }
+    
+
+    // UI CLOSING
+    let examplebutton = document.getElementById("ui_close_button");
+    examplebutton.onclick = () => {
+        engine.CloseUI();
+    };
+
+
+    // SUBSCRIBE FUNCTION TO TICK EVENT (arrow func to func, id)
+    function ExampleFunction() {}
+    let id = "eventExampleId"
+    engine.TickEventSubscribe(() => {ExampleFunction()}, id);
+
+
+    // UNSUBSCRIBE FUNCTION FROM TICK EVENT
+    engine.TickEventUnsubscribe(id);
+
+
+    // UNSUBSCRIBE TO TICK EVENT ON UI QUIT
+    engine.TickEventUiOnQuitUnsubscribe(id);
+
+
+</script>

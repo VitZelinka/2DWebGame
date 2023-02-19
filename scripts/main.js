@@ -14,6 +14,9 @@ export const engine = new Engine(canvas, ctx, socket);
 canvas.width = Math.round(window.innerWidth*window.devicePixelRatio);
 canvas.height = Math.round(window.innerHeight*window.devicePixelRatio);
 
+socket.emit("c2s:get_time", (response) => {
+    engine.timeOffset = response - Date.now();
+});
 
 socket.emit("c2s:get_planets");
 socket.on("s2c:get_planets", data => {
@@ -137,10 +140,7 @@ setInterval(() => {
     socket.emit("debug:get_job", "63c13172e2389b37c6833079", (response) => {
         console.log(response);
     });
-    //console.log(engine.TickEventSubsArray);
-    //console.log(engine.uiOnQuit);
     engine.TickEventExecute();
-    //console.log("ticked");
 }, 1000);
 engine.MoveCam({x: 3, y: 0});
 RenderFrame();

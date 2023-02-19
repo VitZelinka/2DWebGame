@@ -70,11 +70,16 @@ module.exports = (io, socket) => {
         }
     });
 
+    // --------------- SYNC ----------------------
+    socket.on("c2s:get_time", (callback) => {
+        callback(Date.now());
+    });
+
     // ----------- DEBUG ------------------------
 
-    socket.on("c2s:test", (data) => {
-        console.log("Test Connection: "+data);
-        socket.emit("s2c:test", "Connection Received");
+    socket.on("c2s:example", (data, callback) => {
+        console.log("Example Call: " + data);
+        callback("Received call");
     });
 
     socket.on("c2s:debug_entangle_planets", async (data) => {

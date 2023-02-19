@@ -58,7 +58,7 @@ app.get('/', function(req, res) {
         res.redirect("/login");
         return;
     }
-    console.log(req.sessionID);
+    //console.log(req.sessionID);
     res.render("index");
 });
 
