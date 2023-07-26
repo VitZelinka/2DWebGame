@@ -18,6 +18,8 @@ export default class Engine {
         this.allObjects = [];
         this.frameTime = 1;
         this.entangleDrawn = [];
+        this.timeOffset;
+        this.time = () => {return Date.now() + this.timeOffset;}
         // UI
         this.uiOpen = false;
         this.uiData;
@@ -28,8 +30,6 @@ export default class Engine {
         // DEBUG VARS
         this.debugEntangleSelected = null;
         this.debugUntangleSelected = null;
-        this.timeOffset;
-        this.time = () => {return Date.now() + this.timeOffset;}
     }
     
     //---------- COORDINATES ----------

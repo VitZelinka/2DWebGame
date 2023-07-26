@@ -60,13 +60,13 @@ module.exports = (io, socket) => {
         func.RefreshPlanet(planet);
         const cost = resFuncs.cost[toUpgrade](planet.mines[toUpgrade]);
         if (cost > planet.resources[toUpgrade]) {
-            callback(false);
+            callback({result: false});
         } else {
             console.log("Successful request to upgrade a mine")
             func.AddJobToQ(planet, {jobType: "mineUpgrade", jobInfo: toUpgrade, finishAt: Date.now()+10000});
             planet.resources[toUpgrade] -= cost;
             await planet.save();
-            callback(true);
+            callback({result: true, data: planet.jobQueue});
         }
     });
 

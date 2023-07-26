@@ -5,51 +5,58 @@
     <div>
         <p id="planet_resources">Resources:</p>
         <button id="test_upgrade">Upgrade</button>
+        <p id="planet_buildtime">Until built:</p>
     </div>
 </div>
 
 <script type="module">
-    import {engine} from "./main.js";
+    console.log(global);
+
     let closeButton = document.getElementById("ui_close_button");
     closeButton.onclick = () => {
-        engine.CloseUI();
+        global.engine.CloseUI();
     };
     let upgradeButton = document.getElementById("test_upgrade");
     let res = document.getElementById("planet_resources");
+    let buildTime = document.getElementById("planet_buildtime");
 
     upgradeButton.onclick = () => {
-        engine.socket.emit("c2s:upgrade_mine", {planetId: engine.uiData.id,
+        global.engine.socket.emit("c2s:upgrade_mine", {planetId: global.engine.uiData.id,
             toUpgrade: "metal"}, (response) => {
-                console.log(response)
-                if (response) {
-                    const newRes = engine.uiData.resources.metal - 100;
+                if (response.result) {
+                    const newRes = global.engine.uiData.resources.metal - global.ResFuncs.cost.metal(global.engine.uiData.mines.metal);
                     res.innerHTML = "Resoures: " + newRes;
-                    engine.uiData.resources.metal = newRes;
-                    engine.uiData.mines.metal++;
-                    ButtonController();
+                    global.engine.uiData.resources.metal = newRes;
+                    upgradeButton.setAttribute("disabled", "");
+                    console.log(response.data);
+                    global.engine.uiData.jobQueue = response.data;
+                    global.RandFuncs.RefreshPlanet(global.engine.uiData);
+                    UpdateUI();
+                    // TODO: add new job to jobQueue and calculate time and shit
+                } else {
+                    console.log("ERROR: not enough resources");
                 }
             });
     };
 
-    UpdateUIResources();
-    ButtonController();
-    
-    function UpdateUIResources() {
+    UpdateUI();
+
+    function UpdateUI() {
         console.log("res updated");
-        res.innerHTML = "Resoures: " + engine.uiData.resources.metal;
+        global.RandFuncs.RefreshPlanet(global.engine.uiData);
+        console.log(global.engine.uiData.resources.metal);
+        res.innerHTML = "Resoures: " + global.engine.uiData.resources.metal;
     }
 
     function ButtonController() {
-        if (engine.uiData.resources.metal < 100) {
+        if (global.engine.uiData.resources.metal < 100) {
             upgradeButton.setAttribute("disabled", "");
         } else {
             upgradeButton.removeAttribute("disabled");
         }
     }
 
-    engine.TickEventSubscribe(() => {ButtonController()}, "planetUiUpgrade")
-    engine.TickEventSubscribe(() => {UpdateUIResources()}, "planetUi");
-    //engine.uiOnQuit.push(() => {engine.TickEventUnsubscribe("planetUi")});
-    engine.TickEventUiOnQuitUnsubscribe("planetUi");
-    engine.TickEventUiOnQuitUnsubscribe("planetUiUpgrade");
+    global.engine.TickEventSubscribe(() => {UpdateUI()}, "planetUi");
+    //global.engine.uiOnQuit.push(() => {global.engine.TickEventUnsubscribe("planetUi")});
+    global.engine.TickEventUiOnQuitUnsubscribe("planetUi");
 </script>

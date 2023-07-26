@@ -1,6 +1,6 @@
 
-import {Interactable} from "./modules.js";
-import { ResFuncs } from "./modules.js";
+import { default as Interactable } from "./interactable.js";
+import { default as ResFuncs } from "./client_calculations.js";
 
 export default class Planet extends Interactable {
     constructor(CPos, colliderType, size, zHeight, image, owner, entangled, id, resources, mines, jobQueue){
@@ -53,8 +53,9 @@ export default class Planet extends Interactable {
         const updateTime = Date.now();
         let secDiff = (updateTime - this.resUpdated) / 1000;
         for (const key in this.resources) {
-            this.resources[key] = this.resources[key] + ResFuncs[key](this.mines[key], secDiff);
+            this.resources[key] = this.resources[key] + ResFuncs.mined[key](this.mines[key], secDiff);
         }
         this.resUpdated = updateTime;
+        console.log(this.jobQueue);
     }
 }

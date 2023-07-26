@@ -22,7 +22,8 @@ app.set("view engine", "ejs");
 
 app.use(express.static('styles'));
 app.use(express.static('assets'));
-app.use(express.static('scripts'));
+app.use(express.static('dist'));
+//app.use(express.static('client_side'));
 app.use(express.urlencoded({extended: false}));
 const sessionMiddleware = session({
     secret: 'random',
@@ -48,6 +49,7 @@ io.use((socket, next) => {
 
 const regNetComm = require("./net_comm.js");
 const req = require('express/lib/request');
+const exp = require('constants');
 const onConnection = (socket) => {
     regNetComm(io, socket);
 }
@@ -82,8 +84,6 @@ app.post('/login', async function(req, res){
             res.redirect("/login");
             return;
         }
-        //console.log(req.body);
-        //console.log(user.username);
         if (user.password == req.body.password){
             req.session.username = user.username;
             req.session.userid = user._id.toString();

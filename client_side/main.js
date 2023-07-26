@@ -1,6 +1,8 @@
-import {Planet} from "./modules.js";
-import {Engine} from "./modules.js";
-import { PLANET_SIZE } from "./modules.js";
+import {default as Planet} from "./planet.js";
+import {default as Engine} from "./engine.js";
+import { PLANET_SIZE } from "./config.js";
+export {default as ResFuncs} from "./client_calculations.js";
+export * as RandFuncs from "./funcs.js";
 
 const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
@@ -137,9 +139,11 @@ setInterval(() => {
     engine.objects.ownedPlanets.forEach(element => {
         element.UpdateResources();
     });
+    /*
     socket.emit("debug:get_job", "63c13172e2389b37c6833079", (response) => {
         console.log(response);
     });
+    */
     engine.TickEventExecute();
 }, 1000);
 engine.MoveCam({x: 3, y: 0});
