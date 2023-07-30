@@ -3,7 +3,7 @@ module.exports = {
     mode: "development",
     output: {
         filename: 'main.js',
-        library: 'global', // The name of the library (used with libraryTarget: 'var' or 'this')
+        library: 'glb', // The name of the library (used with libraryTarget: 'var' or 'this')
         libraryTarget: 'umd', // The type of library target
     }
 }

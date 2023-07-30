@@ -6,7 +6,7 @@ beforeEach(() => {
     planet = {resources: {metal: 0, crystal: 0},
             mines: {metal: 1, crystal: 0},
             jobQueue: [],
-            resUpdate: 100*1000}
+            resUpdated: 100*1000}
 });
 
 const SYSTEM_TIME = 150*1000;
@@ -27,7 +27,7 @@ test("only default resUpdate", () => {
     func.RefreshPlanet(planet);
     expect(planet.jobQueue[0].finishAt).toEqual(0);
     expect(planet.jobQueue[0].jobInfo).toEqual(0);
-    expect(planet.resUpdate).toEqual(SYSTEM_TIME);
+    expect(planet.resUpdated).toEqual(SYSTEM_TIME);
     expect(planet.resources.metal).toEqual(50);
 });
 

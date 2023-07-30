@@ -12,7 +12,7 @@ const planetSchema = new mongoose.Schema({
     jobQueue: [{jobType: {type: String}, 
                 jobInfo: {type: Object}, 
                 finishAt: {type: Number}}],
-    resUpdate: {type: Date, default: Date.now}
+    resUpdated: {type: Date, default: Date.now}
 })
 
 module.exports = mongoose.model("Planet", planetSchema);

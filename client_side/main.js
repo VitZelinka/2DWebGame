@@ -16,7 +16,10 @@ export const engine = new Engine(canvas, ctx, socket);
 canvas.width = Math.round(window.innerWidth*window.devicePixelRatio);
 canvas.height = Math.round(window.innerHeight*window.devicePixelRatio);
 
+//const pingTestStart = Date.now();
 socket.emit("c2s:get_time", (response) => {
+    //const latency = Date.now() - pingTestStart;
+    //engine.timeOffset = response - Date.now() + latency;
     engine.timeOffset = response - Date.now();
 });
 

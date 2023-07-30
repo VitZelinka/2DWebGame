@@ -10,29 +10,28 @@
 </div>
 
 <script type="module">
-    console.log(global);
+    const uiPlanet = glb.engine.uiData;
 
     let closeButton = document.getElementById("ui_close_button");
     closeButton.onclick = () => {
-        global.engine.CloseUI();
+        glb.engine.CloseUI();
     };
     let upgradeButton = document.getElementById("test_upgrade");
     let res = document.getElementById("planet_resources");
     let buildTime = document.getElementById("planet_buildtime");
 
     upgradeButton.onclick = () => {
-        global.engine.socket.emit("c2s:upgrade_mine", {planetId: global.engine.uiData.id,
+        glb.engine.socket.emit("c2s:upgrade_mine", {planetId: uiPlanet.id,
             toUpgrade: "metal"}, (response) => {
                 if (response.result) {
-                    const newRes = global.engine.uiData.resources.metal - global.ResFuncs.cost.metal(global.engine.uiData.mines.metal);
+                    const newRes = uiPlanet.resources.metal - glb.ResFuncs.cost.metal(uiPlanet.mines.metal);
                     res.innerHTML = "Resoures: " + newRes;
-                    global.engine.uiData.resources.metal = newRes;
+                    uiPlanet.resources.metal = newRes;
                     upgradeButton.setAttribute("disabled", "");
                     console.log(response.data);
-                    global.engine.uiData.jobQueue = response.data;
-                    global.RandFuncs.RefreshPlanet(global.engine.uiData);
+                    uiPlanet.jobQueue = response.data;
+                    glb.RandFuncs.RefreshPlanet(uiPlanet);
                     UpdateUI();
-                    // TODO: add new job to jobQueue and calculate time and shit
                 } else {
                     console.log("ERROR: not enough resources");
                 }
@@ -42,21 +41,25 @@
     UpdateUI();
 
     function UpdateUI() {
-        console.log("res updated");
-        global.RandFuncs.RefreshPlanet(global.engine.uiData);
-        console.log(global.engine.uiData.resources.metal);
-        res.innerHTML = "Resoures: " + global.engine.uiData.resources.metal;
+        glb.RandFuncs.RefreshPlanet(uiPlanet);
+        res.innerHTML = "Resoures: " + Math.round(uiPlanet.resources.metal);
+        try {
+            const rem_time = Math.round((uiPlanet.jobQueue[1].finishAt - glb.engine.time())/1000);
+            buildTime.innerHTML = "Until built: " + rem_time + "s";
+        } catch {
+            buildTime.innerHTML = "Until built: done";
+        }
     }
 
     function ButtonController() {
-        if (global.engine.uiData.resources.metal < 100) {
+        if (uiPlanet.resources.metal < 100) {
             upgradeButton.setAttribute("disabled", "");
         } else {
             upgradeButton.removeAttribute("disabled");
         }
     }
 
-    global.engine.TickEventSubscribe(() => {UpdateUI()}, "planetUi");
-    //global.engine.uiOnQuit.push(() => {global.engine.TickEventUnsubscribe("planetUi")});
-    global.engine.TickEventUiOnQuitUnsubscribe("planetUi");
+    glb.engine.TickEventSubscribe(() => {UpdateUI()}, "planetUi");
+    //glb.engine.uiOnQuit.push(() => {glb.engine.TickEventUnsubscribe("planetUi")});
+    glb.engine.TickEventUiOnQuitUnsubscribe("planetUi");
 </script>

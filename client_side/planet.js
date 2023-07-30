@@ -56,6 +56,5 @@ export default class Planet extends Interactable {
             this.resources[key] = this.resources[key] + ResFuncs.mined[key](this.mines[key], secDiff);
         }
         this.resUpdated = updateTime;
-        console.log(this.jobQueue);
     }
 }

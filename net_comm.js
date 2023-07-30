@@ -107,7 +107,7 @@ module.exports = (io, socket) => {
 
     socket.on("c2s:debug_set_planet_data", async (data) => {
         let planet = await db.planet.findById(data.planetId);
-        planet.resUpdate = Date.now();
+        planet.resUpdated = Date.now();
         if (data.resMetal !== "") {
             planet.resources.metal = Number(data.resMetal);
         }

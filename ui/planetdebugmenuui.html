@@ -27,10 +27,9 @@
 </div>
 
 <script type="module">
-    import {engine} from "./main.js";
     let closeButton = document.getElementById("ui_close_button");
     closeButton.onclick = () => {
-        engine.CloseUI();
+        glb.engine.CloseUI();
     };
 
 
@@ -43,22 +42,22 @@
     let mineCrystalElem = document.getElementById("debug_crystal_mine_input");
 
     try {
-        ownerElem.innerHTML = "Owner: " + engine.uiData.owner;
-        idElem.innerHTML = "ID: " + engine.uiData.id;
-        resMetalElem.placeholder = engine.uiData.resources.metal;
-        resCrystalElem.placeholder = engine.uiData.resources.crystal;
-        mineMetalElem.placeholder = engine.uiData.mines.metal;
-        mineCrystalElem.placeholder = engine.uiData.mines.crystal;
+        ownerElem.innerHTML = "Owner: " + glb.engine.uiData.owner;
+        idElem.innerHTML = "ID: " + glb.engine.uiData.id;
+        resMetalElem.placeholder = glb.engine.uiData.resources.metal;
+        resCrystalElem.placeholder = glb.engine.uiData.resources.crystal;
+        mineMetalElem.placeholder = glb.engine.uiData.mines.metal;
+        mineCrystalElem.placeholder = glb.engine.uiData.mines.crystal;
     } catch (error) {}
 
     function ApplyFunction() {
         let changedData = {};
-        changedData.planetId = engine.uiData.id;
+        changedData.planetId = glb.engine.uiData.id;
         changedData.resMetal = resMetalElem.value;
         changedData.resCrystal = resCrystalElem.value;
         changedData.mineMetal = mineMetalElem.value;
         changedData.mineCrystal = mineCrystalElem.value;
-        engine.DebugSetPlanetData(changedData);
+        glb.engine.DebugSetPlanetData(changedData);
     }
 
     applyButton.onclick = ApplyFunction;

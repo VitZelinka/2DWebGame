@@ -6,32 +6,23 @@ export const  TestFunc = function () {
     console.log("TEST FUNC :DDD");
 }
 
-export const UpdatePlanetResDB = async function (planet) {
-    const updateTime = Date.now();
-    let secDiff = (updateTime - planet.resUpdate) / 1000;
-    for (const [key, value] of Object.entries(planet.resources)) {
-        planet.resources[key] = planet.resources[key] + ResFuncs.mined[key](planet.mines[key], secDiff);
-    }
-    planet.resUpdate = updateTime;
-    await planet.save();
-}
 
 export const UpdatePlanetRes = function (planet) {
     const updateTime = Date.now();
-    let secDiff = (updateTime - planet.resUpdate) / 1000;
+    let secDiff = (updateTime - planet.resUpdated) / 1000;
     for (const [key, value] of Object.entries(planet.resources)) {
         planet.resources[key] = planet.resources[key] + ResFuncs.mined[key](planet.mines[key], secDiff);
     }
-    planet.resUpdate = updateTime;
+    planet.resUpdated = updateTime;
 }
 
 export const UpdatePlanetRes_CTime = function (planet, date) {
     const updateTime = date;
-    let secDiff = (updateTime - planet.resUpdate) / 1000;
+    let secDiff = (updateTime - planet.resUpdated) / 1000;
     for (const [key, value] of Object.entries(planet.resources)) {
         planet.resources[key] = planet.resources[key] + ResFuncs.mined[key](planet.mines[key], secDiff);
     }
-    planet.resUpdate = updateTime;
+    planet.resUpdated = updateTime;
 }
 
 export const RefreshPlanet = function (planet) {
