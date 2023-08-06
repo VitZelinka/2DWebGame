@@ -40,6 +40,7 @@ export default class Planet extends Interactable {
                     }
                 }
             }
+            if (destCPos === undefined) {return;}
             engine.DrawLineDynamic(engine.CoorToVP(this.CPos), engine.CoorToVP(destCPos), "yellow", 8);
         }
     }

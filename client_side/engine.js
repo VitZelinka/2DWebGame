@@ -1,4 +1,5 @@
 import { ZOOM_SPEED, MIN_ZOOM, MAX_ZOOM, GRID_SIZE_REF } from "./config.js";
+const _ = require("lodash");
 
 export default class Engine {
     constructor(canvas, ctx, socket){
@@ -16,6 +17,7 @@ export default class Engine {
         this.posVPRef = {x: 0, y: 0};
         this.objects = {planets: [], ownedPlanets: []};
         this.allObjects = [];
+        this.chunks = [];
         this.frameTime = 1;
         this.entangleDrawn = [];
         this.timeOffset;
@@ -102,7 +104,7 @@ export default class Engine {
     }
 
     ChangeZoom(data){
-        this.desiredZoom += data.deltaY * -0.001;
+        this.desiredZoom += data.deltaY * -0.001 * this.zoomLevel;
         if (this.desiredZoom < MIN_ZOOM){
             this.desiredZoom = MIN_ZOOM;
         } else if (this.desiredZoom > MAX_ZOOM){
@@ -110,6 +112,36 @@ export default class Engine {
         }
     }
     
+    //---------- CHUNKS ----------
+
+    CalculateChunks() {
+        const beforeUpdate = _.cloneDeep(this.chunks);
+        const camcoor = this.WorldToCoor(this.camWPos);
+        const middleChunk = {x: Math.floor(camcoor.x/25), y: Math.floor(camcoor.y/25)};
+        if (this.zoomLevel > 0.38) {
+            if ((middleChunk.y - Math.round(camcoor.y/25)) == 0) {
+                this.chunks = [{x:middleChunk.x-1, y:middleChunk.y-1}, {x:middleChunk.x, y:middleChunk.y-1}, {x:middleChunk.x+1, y:middleChunk.y-1},
+                               {x:middleChunk.x-1, y:middleChunk.y}, middleChunk, {x:middleChunk.x+1, y:middleChunk.y}];
+            } else {
+                this.chunks = [{x:middleChunk.x-1, y:middleChunk.y}, middleChunk, {x:middleChunk.x+1, y:middleChunk.y},
+                               {x:middleChunk.x-1, y:middleChunk.y+1}, {x:middleChunk.x, y:middleChunk.y+1}, {x:middleChunk.x+1, y:middleChunk.y+1}];
+            }
+        } else {
+            this.chunks = [{x:middleChunk.x-1, y:middleChunk.y-1}, {x:middleChunk.x, y:middleChunk.y-1}, {x:middleChunk.x+1, y:middleChunk.y-1},
+                           {x:middleChunk.x-1, y:middleChunk.y}, middleChunk, {x:middleChunk.x+1, y:middleChunk.y},
+                           {x:middleChunk.x-1, y:middleChunk.y+1}, {x:middleChunk.x, y:middleChunk.y+1}, {x:middleChunk.x+1, y:middleChunk.y+1}];
+        }
+        
+        const oldChunks = _.differenceWith(beforeUpdate, this.chunks, _.isEqual);
+        const newChunks = _.differenceWith(this.chunks, beforeUpdate, _.isEqual);
+        if (oldChunks.length > 0 || newChunks.length > 0) {
+            this.socket.emit("c2s:load_new_chunks", {old: oldChunks, new: newChunks});
+        }
+    }
+
+
+
+
     //---------- RENDERING ----------
 
     DrawLine(startVPPos, endVPPos, color, width){
@@ -342,4 +374,18 @@ export default class Engine {
         console.log("DEBUGIGKGJGNG");
         this.socket.emit("c2s:debug_set_planet_data", data);
     }
+
+    DebugDrawChunk(chunkpos) {
+        this.DrawLine(this.WorldToVP({x:chunkpos.x*5000, y:chunkpos.y*5000}), this.WorldToVP({x:(chunkpos.x+1)*5000, y:chunkpos.y*5000}), "pink", 5);
+        this.DrawLine(this.WorldToVP({x:chunkpos.x*5000, y:chunkpos.y*5000}), this.WorldToVP({x:chunkpos.x*5000, y:(chunkpos.y+1)*5000}), "pink", 5);
+        this.DrawLine(this.WorldToVP({x:(chunkpos.x+1)*5000, y:chunkpos.y*5000}), this.WorldToVP({x:(chunkpos.x+1)*5000, y:(chunkpos.y+1)*5000}), "pink", 5);
+        this.DrawLine(this.WorldToVP({x:chunkpos.x*5000, y:(chunkpos.y+1)*5000}), this.WorldToVP({x:(chunkpos.x+1)*5000, y:(chunkpos.y+1)*5000}), "pink", 5);
+    }
+
+    DebugDrawLoadedChunks() {
+        this.chunks.forEach(element => {
+            this.DebugDrawChunk(element);
+        });
+    }
+
 }

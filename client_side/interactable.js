@@ -2,6 +2,7 @@
 export default class Interactable {
     constructor(CPos, colliderType, size, zHeight){
         this.CPos = CPos;
+        this.chunk = {x: Math.floor(this.CPos.x/25), y: Math.floor(this.CPos.y/25)};
         this.zHeight = zHeight;
         // colliderType 1 = circle, 2 = rectangle
         if (colliderType === "circle"){

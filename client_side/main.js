@@ -1,15 +1,17 @@
 import {default as Planet} from "./planet.js";
 import {default as Engine} from "./engine.js";
 import { PLANET_SIZE } from "./config.js";
+import {default as RegSocketOns} from "./netcode.js";
 export {default as ResFuncs} from "./client_calculations.js";
 export * as RandFuncs from "./funcs.js";
+const _ = require("lodash");
 
 const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
 const image = document.getElementById('source');
 const coorText = document.getElementById("coordinates");
 
-let socket = io();
+const socket = io();
 
 export const engine = new Engine(canvas, ctx, socket);
 
@@ -22,6 +24,8 @@ socket.emit("c2s:get_time", (response) => {
     //engine.timeOffset = response - Date.now() + latency;
     engine.timeOffset = response - Date.now();
 });
+
+RegSocketOns();
 
 socket.emit("c2s:get_planets");
 socket.on("s2c:get_planets", data => {
@@ -80,7 +84,7 @@ window.addEventListener("keypress", key => {
             socket.emit("c2s:new_planet", engine.VPToCoor(pos));
             break;
         case "KeyD":
-            socket.emit("c2s:delete_planet", engine.VPToCoor(pos));
+            socket.emit("c2s:delete_planet", engine.GetPlanetByCoor(engine.VPToCoor(pos)));
             break;
         case "KeyH":
             engine.MoveCam({x: 0, y: 0});
@@ -108,6 +112,7 @@ window.addEventListener("keypress", key => {
 
 function RenderFrame(timestamp){
     engine.allObjects = [];
+    engine.CalculateChunks();
     for (const key in engine.objects) {
         engine.allObjects = engine.allObjects.concat(engine.objects[key]);
     }
@@ -127,12 +132,22 @@ function RenderFrame(timestamp){
             element.Draw(engine);
         }
     });
-    const camcoor = engine.VPToWorld(engine.mouseVPPos);
+    const mousewp = engine.VPToWorld(engine.mouseVPPos);
+    const camcoor = engine.WorldToCoor(engine.camWPos);
+    engine.DebugDrawLoadedChunks();
     //const camcoor = engine.mouseVPPos;
     //const camcoor = {x: screen.width, y: screen.height};
     //console.log(window.devicePixelRatio);
     //console.log(engine.frameTime);
-    coorText.textContent = "X: " + camcoor.x + " Y: " + camcoor.y;
+    coorText.textContent = "Cursor World Position - X: " + Math.round(mousewp.x) + " Y: " + Math.round(mousewp.y);
+    coorText.textContent += "\nFPS: " + (1000/engine.frameTime).toFixed(2);
+    coorText.textContent += "\nChunk coordinates - X: " + Math.floor(camcoor.x/25) + " Y: " + Math.floor(camcoor.y/25);
+    let chunkString = "";
+    engine.chunks.forEach(element => {
+        chunkString += "|x:" + element.x + "y:" + element.y + "| ";
+    });
+    coorText.textContent += "\nLoaded chunks: " + chunkString;
+    coorText.textContent += "\nZoom: " + engine.zoomLevel;
     // -------------------
     engine.frameTime = timestamp;
     requestAnimationFrame(RenderFrame);
@@ -142,11 +157,7 @@ setInterval(() => {
     engine.objects.ownedPlanets.forEach(element => {
         element.UpdateResources();
     });
-    /*
-    socket.emit("debug:get_job", "63c13172e2389b37c6833079", (response) => {
-        console.log(response);
-    });
-    */
+    socket.emit("c2s:test");
     engine.TickEventExecute();
 }, 1000);
 engine.MoveCam({x: 3, y: 0});
